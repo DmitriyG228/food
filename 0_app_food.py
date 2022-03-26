@@ -1,4 +1,4 @@
-# cd; conda activate food; cd food; python 0_app.py &>>$HOME/arb_data/output/app1.log & disown
+# cd; conda activate food; cd food; python 0_app_food.py &>>$HOME/arb_data/output/app1.log & disown
 from tendo import singleton
 me = singleton.SingleInstance()
 
@@ -24,7 +24,7 @@ bash_command       = lambda x : os.system(f'cd $HOME/food; conda run -n food pyt
 kill_command       = lambda x : os.system(f'pkill -f {x}')
 scheduler = schedule.Scheduler()
 
-constant_procs = ['bot','milvus_update','inference']#'''','geocode',
+constant_procs = ['bot','milvus_update',s'inference']#'''','geocode'',''
 [scheduler.every(5).seconds.do(partial(bash_command,p)) for p in constant_procs]
 
 while True: 
