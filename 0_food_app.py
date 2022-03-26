@@ -1,4 +1,4 @@
-# cd; conda activate food; cd food; python 0_app_food.py &>>$HOME/arb_data/output/app1.log & disown
+# cd; conda activate food; cd food; python 0_food_app.py &>>$HOME/arb_data/output/app1.log & disown
 from tendo import singleton
 me = singleton.SingleInstance()
 
