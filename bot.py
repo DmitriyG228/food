@@ -1,3 +1,7 @@
+from tendo import singleton
+me = singleton.SingleInstance()
+
+
 from food.tools import *
 from food.paths import *
 
@@ -6,7 +10,6 @@ import numpy as np
 import requests
 import telebot
 
-# !nbdev_build_lib
 from food.classify_image import *
 token = "5091011572:AAG4NfkC_zZjcsaAFkwLm4ZXOvhEqyLpQhY"
 
