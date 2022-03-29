@@ -26,9 +26,6 @@ dependencies:
     - dateparser
     - transformers
     - matplotlib
-    - Shapely
-    - geopandas
-    - geopandas-postgis
     - plotly
     - ftfy
     - schedule
@@ -37,5 +34,3 @@ dependencies:
     - pymilvus
     - wrapt
     - nbdev
-    - dash
-    - dash_bootstrap_components

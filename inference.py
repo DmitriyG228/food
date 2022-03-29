@@ -20,8 +20,8 @@ from food.clipmodel import image2clip
 import custom_pandas as cpd
 from tqdm import tqdm
 
-query = """select p.id,name
-             from foods p
+query = """select p.id,product_name
+             from foods_big p
             where p.clip is Null """
 
 total = engine.execute(f'select count(*) from ({query}) a').one()
@@ -31,9 +31,9 @@ pd_iter = cpd.read_sql_query(query, engine, chunksize=bs, index_col='id')
 
 for inp in tqdm(pd_iter, desc="clip food inference", total=total[0] // bs):  
     try:
-        clip = text2clip(inp['name'].tolist()[0]).numpy().tolist()
+        clip = text2clip(inp['product_name'].tolist()[0]).numpy().tolist()
         inp['clip'] = [clip]
-        insert_ignore(inp,'foods',update=True,update_cols=['clip'],unique_cols=['id'])
+        insert_ignore(inp,'foods_big',update=True,update_cols=['clip'],unique_cols=['id'])
     except:
         print(inp)
 

@@ -42,9 +42,9 @@
 # sudo docker run hello-world
 
 
-## docker container postgis
-# sudo docker pull postgis/postgis
-# sudo docker run --name dima_re_postgres -e POSTGRES_PASSWORD=KJnbuiwuef89k -d -p 5432:5432 postgis/postgis
+# docker container postgis
+sudo docker pull postgis/postgis
+sudo docker run --name dima_re_postgres -e POSTGRES_PASSWORD=KJnbuiwuef89k -d -p 5432:5432 postgis/postgis
 
 
 # github 
