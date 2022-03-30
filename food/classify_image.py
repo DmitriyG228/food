@@ -50,4 +50,7 @@ def search_image(url=None,path=None):
 def get_calories(url=None,path=None):
     r = search_image(url=url)
     r = r[(r['energy_kcal_100g']>r['energy_kcal_100g'].quantile(0.3))&(r['energy_kcal_100g']<r['energy_kcal_100g'].quantile(0.9))]
-    return r[['energy_kcal_100g','proteins_100g','fat_100g','carbohydrates_100g']].mean().round(2)
+    rr = r[['energy_kcal_100g','proteins_100g','fat_100g','carbohydrates_100g']].mean().round(2)
+    rr['ids'] =  r['id'].tolist()
+    rr['scores'] =  r['score'].tolist()
+    return rr

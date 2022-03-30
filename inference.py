@@ -9,9 +9,9 @@ import numpy as np
 from food.clipmodel import *
 
 import os
-os.environ["HF_DATASETS_OFFLINE"] = "0"
-os.environ["TRANSFORMERS_OFFLINE"] = "0"
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["HF_DATASETS_OFFLINE"] = "2"
+os.environ["TRANSFORMERS_OFFLINE"] = "2"
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 from food.tools import *
 from food.psql import *
 from food.paths import *
@@ -34,11 +34,12 @@ for inp in tqdm(pd_iter, desc="clip food inference", total=total[0] // bs):
         text =inp.fillna("")
         for c in text.columns: text[c] = text[c].str.replace('NaN','')
         text = text['product_name']+ '. ' + text['food_groups']+ '. '+ text['categories']+ '. ' + text['ingredients_text']+'. ' + text['keywords'] 
-        clip = text2clip(text.tolist()[0][:200]).numpy().tolist()
+        clip = text2clip(text.tolist()[0][:150]).numpy().tolist()
         inp['clip'] = [clip]
         insert_ignore(inp,'foods_big',update=True,update_cols=['clip'],unique_cols=['product_name'])
-    except:
-        print(text)
+    except RuntimeError as e:
+        print(e)
+
 
 
 
