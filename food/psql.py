@@ -122,8 +122,8 @@ class Foods (Base):
 # Cell
 class Foods_big (Base):
     __tablename__ = 'foods_big'
-    id                  = Column(BIGINT, primary_key=True)
-    product_name        = Column(String,          nullable=True)
+    id                  = Column(BIGINT,   primary_key=True, autoincrement = True)
+    product_name        = Column(String,          nullable=True,unique=True)
     keywords            = Column(String,          nullable=True)
     ingredients_text    = Column(String,          nullable=True)
     categories          = Column(String,          nullable=True)

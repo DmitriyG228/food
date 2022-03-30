@@ -62,7 +62,8 @@ index = {"Path.ls": "00_tools.ipynb",
          "id_table": "06_clip.ipynb",
          "search_by_clip": "classfy_image.ipynb",
          "get_metadata": "classfy_image.ipynb",
-         "search_image": "classfy_image.ipynb"}
+         "search_image": "classfy_image.ipynb",
+         "get_calories": "classfy_image.ipynb"}
 
 modules = ["paths.py",
            "psql.py",

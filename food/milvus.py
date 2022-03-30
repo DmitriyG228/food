@@ -23,12 +23,13 @@ import tempfile
 from pymilvus import *
 collection_name = "food"
 
+
 # Cell
 connections.connect(host="127.0.0.1", port=19533)
 
 dim = 768
 default_fields = [
-    FieldSchema(name="food_id", dtype=DataType.INT64, is_primary=True, auto_id=False),
+    FieldSchema(name="id", dtype=DataType.INT64, is_primary=True, auto_id=False),
     FieldSchema(name="clip", dtype=DataType.FLOAT_VECTOR, dim=dim),
 
 ]

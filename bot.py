@@ -14,9 +14,11 @@ from food.classify_image import *
 token = "5091011572:AAG4NfkC_zZjcsaAFkwLm4ZXOvhEqyLpQhY"
 
 bot = telebot.TeleBot(token)
+
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
 	bot.reply_to(message, "Hi, send photos of your food here")
+	
 @bot.message_handler(content_types=['photo'])
 def echo_all(message):
 	file_info = bot.get_file(message.photo[3].file_id)
