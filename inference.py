@@ -33,7 +33,7 @@ for inp in tqdm(pd_iter, desc="clip food inference", total=total[0] // bs):
     try:
         text =inp.fillna("")
         for c in text.columns: text[c] = text[c].str.replace('NaN','')
-        text = text['product_name']+ '. ' + text['food_groups']+ '. '+ text['categories']+ '. ' + text['ingredients_text']+'. ' + text['keywords'] 
+        text = text['product_name']+ '. ' + text['food_groups']#+ '. '+ text['categories']+ '. ' + text['ingredients_text']+'. ' + text['keywords'] 
         clip = text2clip(text.tolist()[0][:150]).numpy().tolist()
         inp['clip'] = [clip]
         insert_ignore(inp,'foods_big',update=True,update_cols=['clip'],unique_cols=['product_name'])

@@ -53,4 +53,5 @@ def get_calories(url=None,path=None):
     rr = r[['energy_kcal_100g','proteins_100g','fat_100g','carbohydrates_100g']].mean().round(2)
     rr['ids'] =  r['id'].tolist()
     rr['scores'] =  r['score'].tolist()
+    rr['names']  =  r['product_name'].tolist()
     return rr
