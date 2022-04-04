@@ -12,15 +12,16 @@ from .psql import *
 
 # !nbdev_build_lib
 import requests
-from .clipmodel import image2clip
+from .clipmodel import image2clip,text2clip
 from PIL import Image
 
 # Cell
 from .milvus import collection
 collection.load()
+collection.num_entities
 
 # Cell
-def search_by_clip(clip, topk=10, query_expr='',search_params = {'ef':10000}): #32768
+def search_by_clip(clip, topk=5, query_expr='',search_params = {}): #32768
     search_params = {"metric_type": "IP",
                      "params": search_params}
 
@@ -30,7 +31,7 @@ def search_by_clip(clip, topk=10, query_expr='',search_params = {'ef':10000}): #
     return list(results.distances), results.ids
 
 def get_metadata(ids):
-    q = f"""select * from foods_big where id in {tuple(ids)}"""
+    q = f"""select * from foods where id in {tuple(ids)}"""
     return pd.read_sql(q,engine)
 
 # Cell
