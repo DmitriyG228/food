@@ -69,7 +69,8 @@ def send_cancel(message):
 	bot.reply_to(message, f"cancalled", reply_markup=markup)
 	if hasattr(bot,'dish'): del bot.dish
 	if hasattr(bot,'measures'): del bot.measures
-
+	if hasattr(bot,'measurement'): del bot.measurement
+	if hasattr(bot,'label'): del bot.label
 
 @bot.message_handler(content_types=['photo'])
 def calssify_image(message):
@@ -91,33 +92,44 @@ def calssify_image(message):
 	bot.reply_to(message, plot_numtients.to_string())
 
 	bot.measures = pd.read_sql(f"select portion_description,gram_weight from portions where food_id = {bot.dish['id'].iloc[0]}",engine)
+	bot.measures_cleaned = bot.measures['portion_description'].str.replace('1 ','').tolist()
 
 	markup = types.ReplyKeyboardMarkup(row_width=2)
 	cancel = types.KeyboardButton('/cancel')
-	[markup.add(p) for p in bot.measures['portion_description'].str.replace('1 ','').tolist()]
+	[markup.add(p) for p in bot.measures_cleaned]
 	markup.add('gram')
 	markup.add(cancel)
 
-	bot.send_message(message.chat.id, "Choose the way to measure the dish", reply_markup=markup)
+	bot.send_message(message.chat.id, "Choose the unit to measure the weight of you dish", reply_markup=markup)
 
 
 @bot.message_handler(content_types=['text']) #regexp="[0-9]+"
 def handle_text(message):
-	if hasattr(bot,'dish') and not hasattr(bot,'measurement') and hasattr(bot,'label'):
+
+	bot.message = message
+	try:     bot.number = int(message.text)
+	except:  bot.number = None
+
+	if not bot.number and hasattr(bot,'label'):
 		markup = types.ReplyKeyboardMarkup(row_width=2)
+		[markup.add(str(p)) for p in range(1,5)]
 		cancel = types.KeyboardButton('/cancel')
 		markup.add(cancel)
 
-		bot.measurement = message.text
-		bot.reply_to(message, f"select number of {bot.measurement}s you are going to eat", reply_markup=markup)
+		if len(set(bot.measures_cleaned) & set([message.text])) >0:
+			bot.measurement = message.text
+			bot.reply_to(message, f"select number of {bot.measurement}s you are going to eat", reply_markup=markup)
+
+		else:
+			bot.reply_to(message, f"please choose a unit from the list")
 
 
-	try:     number = int(message.text)
-	except:  number = None
 
-	if hasattr(bot,'dish') and  hasattr(bot,'measurement') and number and  hasattr(bot,'measures')and hasattr(bot,'label'): 
-		if bot.measurement == 'gram': grams = number
-		else:grams = bot.measures[bot.measures['portion_description'].str.contains(bot.measurement)]['gram_weight'].iloc[0]*number
+	
+
+	elif bot.number and hasattr(bot,'label'): 
+		if bot.measurement == 'gram': grams = bot.number
+		else:grams = bot.measures[bot.measures['portion_description'].str.contains(bot.measurement)]['gram_weight'].iloc[0]*bot.number
 		bot.dish[['energy','protein','carb','fat']] = bot.dish[['energy','protein','carb','fat']]/100*grams
 		bot.dish['grams']=grams
 		bot.dish['measure_selected'] = message.text
@@ -141,11 +153,21 @@ def handle_text(message):
 
 
 
-		bot.reply_to(message, f"{bot.label} added", reply_markup=markup)
+		bot.reply_to(message, f" {bot.number} {bot.measurement}s  of {bot.label} added", reply_markup=markup)
 		bot.reply_to(message, f"You have consumed {round(today_consumed)} kcall today", reply_markup=markup)
 
 		del bot.dish
 		del bot.measures
 		del bot.measurement
+		del bot.label
+
+	elif not hasattr(bot,'label'):
+
+		bot.reply_to(message, f"Please take a photo of your dish")
+
+
+
+
+	
 
 bot.infinity_polling()
