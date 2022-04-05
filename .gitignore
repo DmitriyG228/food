@@ -224,3 +224,11 @@ volumes/minio/a-bucket/files/stats_log/432295994347749377/432295994347749378/432
 volumes/minio/a-bucket/files/stats_log/432295994347749377/432295994347749378/432296007507378178/0/432296008175845379
 volumes/minio/a-bucket/files/stats_log/432295994347749377/432295994347749378/432296007507378178/1/432296008175845380
 volumes/minio/a-bucket/files/stats_log/432295994347749377/432295994347749378/432296007507378178/100/432296008175845377
+volumes/milvus/rdb_data/000010.sst
+volumes/milvus/rdb_data/000015.sst
+volumes/milvus/rdb_data/000016.sst
+volumes/milvus/rdb_data/000017.sst
+volumes/milvus/rdb_data/000019.sst
+volumes/milvus/rdb_data_meta_kv/000010.sst
+volumes/milvus/rdb_data_meta_kv/000012.sst
+volumes/milvus/rdb_data/000010.sst
