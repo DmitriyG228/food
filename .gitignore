@@ -110,6 +110,7 @@ ENV/
 
 # mkdocs documentation
 /site
+/volumes
 
 # mypy
 .mypy_cache/
