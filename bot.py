@@ -92,12 +92,11 @@ def calssify_image(message):
 	bot.reply_to(message, plot_numtients.to_string())
 
 	bot.measures = pd.read_sql(f"select portion_description,gram_weight from portions where food_id = {bot.dish['id'].iloc[0]}",engine)
-	bot.measures_cleaned = bot.measures['portion_description'].str.replace('1 ','').tolist()
+	bot.measures_cleaned = bot.measures['portion_description'].str.replace('1 ','').tolist()+['gram']
 
 	markup = types.ReplyKeyboardMarkup(row_width=2)
 	cancel = types.KeyboardButton('/cancel')
 	[markup.add(p) for p in bot.measures_cleaned]
-	markup.add('gram')
 	markup.add(cancel)
 
 	bot.send_message(message.chat.id, "Choose the unit to measure the weight of you dish", reply_markup=markup)
@@ -111,13 +110,15 @@ def handle_text(message):
 	except:  bot.number = None
 
 	if not bot.number and hasattr(bot,'label'):
-		markup = types.ReplyKeyboardMarkup(row_width=2)
-		[markup.add(str(p)) for p in range(1,5)]
-		cancel = types.KeyboardButton('/cancel')
-		markup.add(cancel)
+		
 
 		if len(set(bot.measures_cleaned) & set([message.text])) >0:
 			bot.measurement = message.text
+			markup = types.ReplyKeyboardMarkup(row_width=2)
+			if bot.measurement == 'gram': [markup.add(str(p)) for p in range(20,400,20)]
+			else:[markup.add(str(p)) for p in range(1,5)]
+			cancel = types.KeyboardButton('/cancel')
+			markup.add(cancel)
 			bot.reply_to(message, f"select number of {bot.measurement}s you are going to eat", reply_markup=markup)
 
 		else:
@@ -140,9 +141,6 @@ def handle_text(message):
 
 	
 		markup = types.ReplyKeyboardRemove(selective=False)
-		
-		
-		
 
 		today_consumed = pd.read_sql(f"select energy,timestamp from {dishes} where user_id = {message.from_user.id} and timestamp > now() - interval '24 hours';",engine).set_index("timestamp")
 		user_tz = engine.execute(f'select timezone from {users} where id={message.from_user.id}').first()
