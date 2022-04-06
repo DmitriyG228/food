@@ -104,6 +104,8 @@ def calssify_image(message):
 
 @bot.message_handler(content_types=['text']) #regexp="[0-9]+"
 def handle_text(message):
+	global m
+	m = message
 
 	bot.message = message
 	try:     bot.number = int(message.text)
@@ -130,7 +132,7 @@ def handle_text(message):
 
 	elif bot.number and hasattr(bot,'label'): 
 		if bot.measurement == 'gram': grams = bot.number
-		else:grams = bot.measures[bot.measures['portion_description'].str.contains(bot.measurement)]['gram_weight'].iloc[0]*bot.number
+		else:grams = bot.measures[bot.measures['portion_description'].str.contains(bot.measurement, regex=False)]['gram_weight'].iloc[0]*bot.number
 		bot.dish[['energy','protein','carb','fat']] = bot.dish[['energy','protein','carb','fat']]/100*grams
 		bot.dish['grams']=grams
 		bot.dish['measure_selected'] = message.text
@@ -144,11 +146,13 @@ def handle_text(message):
 
 		today_consumed = pd.read_sql(f"select energy,timestamp from {dishes} where user_id = {message.from_user.id} and timestamp > now() - interval '24 hours';",engine).set_index("timestamp")
 		user_tz = engine.execute(f'select timezone from {users} where id={message.from_user.id}').first()
-		if user_tz: today_consumed = today_consumed.tz_convert(user_tz[0])
-		else: bot.reply_to(message, "Please send your location to that we know your local time", reply_markup=markup)
+		user_tz = user_tz[0] if user_tz else 'UTC'
+		today_consumed = today_consumed.tz_convert(user_tz)
+		if user_tz == 'UTC': bot.reply_to(message, "Please send your location to that we know your local time", reply_markup=markup)
+		now = pd.Timestamp.now(tz = user_tz)
 		today_consumed = today_consumed.reset_index()	
-		today_consumed = today_consumed[today_consumed['timestamp'].dt.time > datetime.time(3,0)]['energy'].sum()
-
+		this_morning = pd.Timestamp(year = now.year,month = now.month,day = now.day,hour = 3,tz = user_tz)
+		today_consumed = today_consumed[today_consumed['timestamp'] > pd.Timestamp(this_morning)]['energy'].sum()
 
 
 		bot.reply_to(message, f" {bot.number} {bot.measurement}s  of {bot.label} added", reply_markup=markup)
