@@ -24,7 +24,7 @@ bash_command       = lambda x : os.system(f'cd $HOME/food; conda run -n food pyt
 kill_command       = lambda x : os.system(f'pkill -f {x}')
 scheduler = schedule.Scheduler()
 
-constant_procs = ['bot','milvus_update','inference']
+constant_procs = ['bot']
 [scheduler.every(5).seconds.do(partial(bash_command,p)) for p in constant_procs]
 
 while True: 
