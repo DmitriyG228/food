@@ -38,13 +38,31 @@ bot.dish = None
 
 @bot.message_handler(commands=['start'])
 def welcome(message):
+	bot.message = message
 	markup = types.ReplyKeyboardMarkup(row_width=1,resize_keyboard=True)
 	markup.add('/help')
 	bot.reply_to(message, "Counting calories as easy as taking pictures. Just capture everything before you eat it", reply_markup=markup)
 	bot.reply_to(message, "Now send a photo of your meal to try", reply_markup=markup)
 
+
+@bot.message_handler(commands=['show_last_items'])
+def show_last(message):
+	bot.message = message
+
+	markup = types.ReplyKeyboardMarkup(row_width=1,resize_keyboard=True)
+	markup.add('/help')
+	bot.reply_to(message, "Counting calories as easy as taking pictures. Just capture everything before you eat it", reply_markup=markup)
+	bot.reply_to(message, "Now send a photo of your meal to try", reply_markup=markup)
+
+
+
+
+
+
 @bot.message_handler(content_types=['location'])
 def location(message):
+	bot.message = message
+
 	bot.send_chat_action(message.chat.id, 'typing')
 	tz = tzwhere.tzwhere().tzNameAt(message.location.latitude, message.location.longitude)
 
@@ -61,10 +79,12 @@ def location(message):
 
 @bot.message_handler(commands=['help'])
 def help(message):
+	bot.message = message
 	bot.reply_to(message, "join our support group https://t.me/+nIBkPkw3vpM0NDJi")
 
 @bot.message_handler(commands=['cancel'])
 def send_cancel(message):
+	bot.message = message
 	markup = types.ReplyKeyboardRemove(selective=False)
 	bot.reply_to(message, f"cancalled", reply_markup=markup)
 	if hasattr(bot,'dish'): del bot.dish
@@ -74,6 +94,7 @@ def send_cancel(message):
 
 @bot.message_handler(content_types=['photo'])
 def calssify_image(message):
+	bot.message = message
 
 	bot.send_chat_action(message.chat.id, 'typing')
 	
@@ -92,6 +113,9 @@ def calssify_image(message):
 	bot.reply_to(message, plot_numtients.to_string())
 
 	bot.measures = pd.read_sql(f"select portion_description,gram_weight from portions where food_id = {bot.dish['id'].iloc[0]}",engine)
+	
+	bot.measures['portion_description'] = bot.measures['portion_description']+' ('+bot.measures['gram_weight'].astype('int').astype('str')+' grams)'
+
 	bot.measures_cleaned = bot.measures['portion_description'].str.replace('1 ','').tolist()+['gram']
 
 	markup = types.ReplyKeyboardMarkup(row_width=2)
@@ -104,11 +128,8 @@ def calssify_image(message):
 
 @bot.message_handler(content_types=['text']) #regexp="[0-9]+"
 def handle_text(message):
-	global m
-	m = message
-
 	bot.message = message
-	try:     bot.number = int(message.text)
+	try:     bot.number = float(message.text)
 	except:  bot.number = None
 
 	if not bot.number and hasattr(bot,'label'):
@@ -117,8 +138,8 @@ def handle_text(message):
 		if len(set(bot.measures_cleaned) & set([message.text])) >0:
 			bot.measurement = message.text
 			markup = types.ReplyKeyboardMarkup(row_width=2)
-			if bot.measurement == 'gram': [markup.add(str(p)) for p in range(20,400,20)]
-			else:[markup.add(str(p)) for p in range(1,5)]
+			if bot.measurement == 'gram': [markup.add(str(p)) for p in range(10,400,10)]
+			else:[markup.add(str(p)) for p in [0.5,1,1.5,2,3,4,5,6,7,8,9,10]]
 			cancel = types.KeyboardButton('/cancel')
 			markup.add(cancel)
 			bot.reply_to(message, f"select number of {bot.measurement}s you are going to eat", reply_markup=markup)
