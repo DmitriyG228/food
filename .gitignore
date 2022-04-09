@@ -103,3 +103,14 @@ food/__pycache__/milvus.cpython-39.pyc
 food/__pycache__/paths.cpython-39.pyc
 food/__pycache__/psql.cpython-39.pyc
 food/__pycache__/tools.cpython-39.pyc
+volumes/milvus/rdb_data/000078.sst
+volumes/milvus/rdb_data/000079.sst
+volumes/milvus/rdb_data/000080.sst
+volumes/milvus/rdb_data/000081.sst
+volumes/milvus/rdb_data/000082.sst
+volumes/milvus/rdb_data/000084.sst
+volumes/milvus/rdb_data/000085.log
+volumes/milvus/rdb_data/000086.sst
+volumes/milvus/rdb_data_meta_kv/000042.sst
+volumes/milvus/rdb_data_meta_kv/000043.log
+volumes/milvus/rdb_data_meta_kv/000044.sst
