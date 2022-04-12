@@ -130,3 +130,15 @@ volumes/milvus/rdb_data/000133.sst
 volumes/milvus/rdb_data_meta_kv/000060.sst
 volumes/milvus/rdb_data_meta_kv/000061.log
 volumes/milvus/rdb_data_meta_kv/000062.sst
+volumes/milvus/rdb_data/000141.sst
+volumes/milvus/rdb_data/000142.sst
+volumes/milvus/rdb_data/000143.sst
+volumes/milvus/rdb_data/000144.sst
+volumes/milvus/rdb_data/000145.sst
+volumes/milvus/rdb_data/000146.sst
+volumes/milvus/rdb_data/000148.sst
+volumes/milvus/rdb_data/000149.log
+volumes/milvus/rdb_data/000150.sst
+volumes/milvus/rdb_data_meta_kv/000069.sst
+volumes/milvus/rdb_data_meta_kv/000070.log
+volumes/milvus/rdb_data_meta_kv/000071.sst
