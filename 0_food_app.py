@@ -1,4 +1,4 @@
-# cd; conda activate food; cd food; python 0_food_app.py &>>$HOME/arb_data/output/app1.log & disown
+# cd; conda activate food; cd food; python 0_food_app.py &>>$HOME/app1.log & disown
 from tendo import singleton
 me = singleton.SingleInstance()
 
@@ -20,7 +20,7 @@ from pathlib import Path
 import os
 from functools import partial
 
-bash_command       = lambda x : os.system(f'cd $HOME/food; conda run -n food python "{x}".py &>>$HOME/arb_data/output/"{x}".log')
+bash_command       = lambda x : os.system(f'cd $HOME/food; conda run -n food python "{x}".py &>>$HOME/"{x}".log')
 kill_command       = lambda x : os.system(f'pkill -f {x}')
 scheduler = schedule.Scheduler()
 

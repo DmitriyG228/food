@@ -80,7 +80,7 @@ def location(message):
 @bot.message_handler(commands=['help'])
 def help(message):
 	bot.message = message
-	bot.reply_to(message, "join our support group https://t.me/+nIBkPkw3vpM0NDJi")
+	bot.reply_to(message, "join our community group https://t.me/+nIBkPkw3vpM0NDJi")
 
 @bot.message_handler(commands=['cancel'])
 def send_cancel(message):
