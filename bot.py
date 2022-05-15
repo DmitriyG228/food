@@ -24,7 +24,7 @@ from tzwhere import tzwhere
 debug = False
 
 dishes = 'dishes_test'  if debug else 'dishes'
-users = 'users_test'  if debug else 'users'
+users = 'users_test'    if debug else 'users'
 
 token = "5091011572:AAG4NfkC_zZjcsaAFkwLm4ZXOvhEqyLpQhY" if debug else '5203882708:AAG3G_Y2oZSr-rMG2zoffDVtj3d0KkOFSts'
 
@@ -72,7 +72,7 @@ def location(message):
               tz]],
               columns = ['id','lat','lon','timezone'])
 
-	insert_ignore(df,users,update = True, update_cols = ['lat','lon','timezone'], engine = engine,unique_cols=['id'])
+	insert_ignore(df,f'food.{users}',update = True, update_cols = ['lat','lon','timezone'], engine = engine,unique_cols=['id'])
 	bot.reply_to(message, f"your timezone is set to {tz}")
 
 
@@ -112,7 +112,7 @@ def calssify_image(message):
 	bot.reply_to(message, bot.label)
 	bot.reply_to(message, plot_numtients.to_string())
 
-	bot.measures = pd.read_sql(f"select portion_description,gram_weight from portions where food_id = {bot.dish['id'].iloc[0]}",engine)
+	bot.measures = pd.read_sql(f"select portion_description,gram_weight from food.portions where food_id = {bot.dish['id'].iloc[0]}",engine)
 	
 	bot.measures['portion_description'] = bot.measures['portion_description']+' ('+bot.measures['gram_weight'].astype('int').astype('str')+' grams)'
 
@@ -160,13 +160,13 @@ def handle_text(message):
 		bot.dish = bot.dish.rename(columns = {'id':'food_id'})
 		bot.dish['timestamp']=pd.Timestamp.utcnow()
 
-		bot.dish.to_sql(dishes,engine,if_exists='append',index=False)
+		bot.dish.to_sql(dishes,engine,if_exists='append',index=False,schema = 'food')
 
 	
 		markup = types.ReplyKeyboardRemove(selective=False)
 
-		today_consumed = pd.read_sql(f"select energy,timestamp from {dishes} where user_id = {message.from_user.id} and timestamp > now() - interval '24 hours';",engine).set_index("timestamp")
-		user_tz = engine.execute(f'select timezone from {users} where id={message.from_user.id}').first()
+		today_consumed = pd.read_sql(f"select energy,timestamp from food.{dishes} where user_id = {message.from_user.id} and timestamp > now() - interval '24 hours';",engine).set_index("timestamp")
+		user_tz = engine.execute(f'select timezone from food.{users} where id={message.from_user.id}').first()
 		user_tz = user_tz[0] if user_tz else 'UTC'
 		today_consumed = today_consumed.tz_convert(user_tz)
 		if user_tz == 'UTC': bot.reply_to(message, "Please send your location to that we know your local time", reply_markup=markup)
