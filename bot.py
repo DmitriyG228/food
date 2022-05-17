@@ -80,7 +80,7 @@ def location(message):
 @bot.message_handler(commands=['help'])
 def help(message):
 	bot.message = message
-	bot.reply_to(message, "join our community group https://t.me/+nIBkPkw3vpM0NDJi")
+	bot.reply_to(message, "j -f botoin our community group https://t.me/+nIBkPkw3vpM0NDJi")
 
 @bot.message_handler(commands=['cancel'])
 def send_cancel(message):
@@ -99,6 +99,7 @@ def calssify_image(message):
 	bot.send_chat_action(message.chat.id, 'typing')
 	
 	image_url = bot.get_file_url(message.photo[3].file_id)
+	to_pickle(image_url,'image_url')
 	bot.dish = search_image(url=image_url)
 	bot.dish['image_url'] = image_url
 	bot.dish['user_id']= message.from_user.id
