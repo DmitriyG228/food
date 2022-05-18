@@ -1,7 +1,6 @@
 from tendo import singleton
 me = singleton.SingleInstance()
 
-
 from food.tools import *
 from food.paths import *
 
@@ -80,7 +79,7 @@ def location(message):
 @bot.message_handler(commands=['help'])
 def help(message):
 	bot.message = message
-	bot.reply_to(message, "j -f botoin our community group https://t.me/+nIBkPkw3vpM0NDJi")
+	bot.reply_to(message, "join our community group https://t.me/+nIBkPkw3vpM0NDJi")
 
 @bot.message_handler(commands=['cancel'])
 def send_cancel(message):
@@ -160,6 +159,9 @@ def handle_text(message):
 		bot.dish['measure_selected'] = message.text
 		bot.dish = bot.dish.rename(columns = {'id':'food_id'})
 		bot.dish['timestamp']=pd.Timestamp.utcnow()
+		bot.dish = bot.dish[['food_id', 'description', 'category', 'energy', 'protein', 'carb',
+								'fat', 'score', 'image_url', 'user_id', 'grams', 'measure_selected',
+								'timestamp']]
 
 		bot.dish.to_sql(dishes,engine,if_exists='append',index=False,schema = 'food')
 

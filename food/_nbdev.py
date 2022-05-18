@@ -84,8 +84,8 @@ index = {"img_resize": "00_clipmodel.ipynb",
          "sql_head": "00_tools.ipynb",
          "make_clickable": "00_tools.ipynb",
          "selected_countries": "00_tools.ipynb",
-         "foods": "01_classfy_image.ipynb",
-         "search_image": "01_classfy_image.ipynb"}
+         "foods": "01_multiple_foods.ipynb",
+         "search_image": "01_multiple_foods.ipynb"}
 
 modules = ["clipmodel.py",
            "custom_pandas.py",
