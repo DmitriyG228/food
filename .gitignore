@@ -97,7 +97,7 @@ volumes/minio/a-bucket/files/stats_log/432295994347749377/432295994347749378/432
 volumes/minio/a-bucket/files/stats_log/432295994347749377/432295994347749378/432296007507378178/100/432296008175845377
 food/__pycache__/__init__.cpython-39.pyc
 food/__pycache__/_nbdev.cpython-39.pyc
-food/__pycache__/classify_image.cpython-39.pyc
+food/__pycache__/search.cpython-39.pyc
 food/__pycache__/clipmodel.cpython-39.pyc
 food/__pycache__/milvus.cpython-39.pyc
 food/__pycache__/paths.cpython-39.pyc
