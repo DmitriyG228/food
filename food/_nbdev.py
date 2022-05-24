@@ -84,8 +84,9 @@ index = {"img_resize": "00_clipmodel.ipynb",
          "sql_head": "00_tools.ipynb",
          "make_clickable": "00_tools.ipynb",
          "selected_countries": "00_tools.ipynb",
-         "foods": "01_multiple_foods.ipynb",
-         "search_image": "01_multiple_foods.ipynb"}
+         "foods": "01_search.ipynb",
+         "search_image": "01_search.ipynb",
+         "read_image_from_url": "01_search.ipynb"}
 
 modules = ["clipmodel.py",
            "custom_pandas.py",
@@ -93,7 +94,7 @@ modules = ["clipmodel.py",
            "psql.py",
            "qdrant.py",
            "tools.py",
-           "classify_image.py"]
+           "search.py"]
 
 doc_url = "https://{user}.github.io/food/"
 

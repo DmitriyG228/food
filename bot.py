@@ -11,7 +11,7 @@ import telebot
 from food.psql import *
 
 # !nbdev_build_lib
-from food.classify_image import *
+from food.search import *
 
 from telebot import types
 
