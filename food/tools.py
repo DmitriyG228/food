@@ -2,9 +2,9 @@
 
 __all__ = ['get_image_from_url', 'kill', 'get_hash_folder', 'save_selected_cities', 'save_location_dicts',
            'get_top_n_countries', 'path_info', 'rm_r', 'search_notebooks', 'df_chunk_generator', 'docker_container',
-           'LogDBHandler', 'get_logger', 'compound_return', 'copy_func', 'patch_to', 'patch', 'to_pickle',
-           'from_pickle', 'telegram', 'pdrows', 'pd_highlight', 'inline', 'plot_map', 'htop', 'get_proxies',
-           'append_csv', 'repeat_df', 'to_sql', 'timestamp2int', 'pd_timestamp', 'startEndTimestamp',
+           'LogDBHandler', 'get_logger', 'read_image_from_url', 'compound_return', 'copy_func', 'patch_to', 'patch',
+           'to_pickle', 'from_pickle', 'telegram', 'pdrows', 'pd_highlight', 'inline', 'plot_map', 'htop',
+           'get_proxies', 'append_csv', 'repeat_df', 'to_sql', 'timestamp2int', 'pd_timestamp', 'startEndTimestamp',
            'docker_container', 'pd_set_float', 'plot_multiple_y', 'sql_head', 'make_clickable', 'selected_countries']
 
 # Cell
@@ -147,6 +147,11 @@ def get_logger(name,sql_logs='logs',return_handler=False):
     logger.addHandler(bd_handler)
     if return_handler: return logger,bd_handler
     else:              return logger
+
+# Cell
+def read_image_from_url(url=None):
+    response = requests.get(url, stream=True)
+    return Image.open(response.raw)
 
 # Cell
 def compound_return(r,n): return ((1+r)**n)-1

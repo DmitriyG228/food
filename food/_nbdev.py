@@ -60,6 +60,7 @@ index = {"img_resize": "00_clipmodel.ipynb",
          "docker_container": "00_tools.ipynb",
          "LogDBHandler": "00_tools.ipynb",
          "get_logger": "00_tools.ipynb",
+         "read_image_from_url": "01_search.ipynb",
          "compound_return": "00_tools.ipynb",
          "copy_func": "00_tools.ipynb",
          "patch_to": "00_tools.ipynb",
@@ -85,8 +86,7 @@ index = {"img_resize": "00_clipmodel.ipynb",
          "make_clickable": "00_tools.ipynb",
          "selected_countries": "00_tools.ipynb",
          "foods": "01_search.ipynb",
-         "search_image": "01_search.ipynb",
-         "read_image_from_url": "01_search.ipynb"}
+         "search_image": "01_search.ipynb"}
 
 modules = ["clipmodel.py",
            "custom_pandas.py",
@@ -94,6 +94,7 @@ modules = ["clipmodel.py",
            "psql.py",
            "qdrant.py",
            "tools.py",
+           "classify_image.py",
            "search.py"]
 
 doc_url = "https://{user}.github.io/food/"

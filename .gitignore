@@ -1,1 +1,2 @@
-food/__pycache__/
+/food/__pycache__/
+food/__pycache__/qdrant.cpython-39.pyc
