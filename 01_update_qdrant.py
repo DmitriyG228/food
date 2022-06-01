@@ -13,13 +13,15 @@ from food.qdrant import *
 
 
 project_name = "food"
+table = 'foods_prompted'
+collection_name = 'food_prompted'
 dim = 768
 limit = 100000
 
 
 
 query = f"""select f.id,f.description, f.clip as clip
-        FROM      {project_name}.foods    f
+        FROM      {project_name}.{table}    f
         LEFT JOIN {project_name}.indexed  i  ON (i.id =       f.id)
         
         WHERE clip    is not null and 
@@ -40,7 +42,7 @@ for df in tqdm(cpd.read_sql_query(query, engine, chunksize=limit), desc="qdrant_
     payload = df.drop(columns = ['id','clip']).to_dict('records')
 
     client.upload_collection(
-        collection_name=project_name,
+        collection_name=collection_name,
         vectors=clip,
         payload=payload,
         ids=ids,
