@@ -12,7 +12,9 @@ import numpy as np
 from tqdm import tqdm
 
 from qdrant_client import QdrantClient
+import qdrant_client
 collection_name = "food_prompted"
+
 
 # Cell
 client = QdrantClient(host='localhost', port=6333)

@@ -95,11 +95,12 @@ def multiple_foods(url):
     description = '. '.join(r[r['cumcount']<0.9]['description'].unique().tolist())
 
 
-    return r.drop(columns = ['clip']), description, selected
+    return r.drop(columns = ['clip']), description, selected,initscore
 
 # Cell
 def search_image(url):
-    r, desc, sel = multiple_foods(url)
-    df = sel[['energy','protein','carb','fat']].mean().to_frame().T
+    r, desc, sel,score = multiple_foods(url)
+    df = sel[['energy','protein','carb','fat','score']].mean().to_frame().T
+    df['score'] =score
     df['description'] = desc
     return df.round()

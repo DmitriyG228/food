@@ -20,6 +20,7 @@ import pytz
 from tzwhere import tzwhere
 
 
+
 debug = False
 
 dishes = 'dishes_test'  if debug else 'dishes'
@@ -112,18 +113,14 @@ def calssify_image(message):
 	bot.reply_to(message, bot.label)
 	bot.reply_to(message, plot_numtients.to_string())
 
-	bot.measures = pd.read_sql(f"select portion_description,gram_weight from food.portions where food_id = {bot.dish['id'].iloc[0]}",engine)
-	
-	bot.measures['portion_description'] = bot.measures['portion_description']+' ('+bot.measures['gram_weight'].astype('int').astype('str')+' grams)'
-
-	bot.measures_cleaned = bot.measures['portion_description'].str.replace('1 ','').tolist()+['gram']
+	bot.measurement ='gram'
 
 	markup = types.ReplyKeyboardMarkup(row_width=2)
+	if bot.measurement == 'gram': [markup.add(str(p)) for p in range(10,400,10)]
+	else:[markup.add(str(p)) for p in [0.5,1,1.5,2,3,4,5,6,7,8,9,10]]
 	cancel = types.KeyboardButton('/cancel')
-	[markup.add(p) for p in bot.measures_cleaned]
 	markup.add(cancel)
-
-	bot.send_message(message.chat.id, "Choose the unit to measure the weight of you dish", reply_markup=markup)
+	bot.reply_to(message, f"set weight of the dish you are going to eat", reply_markup=markup)
 
 
 @bot.message_handler(content_types=['text']) #regexp="[0-9]+"
@@ -132,36 +129,18 @@ def handle_text(message):
 	try:     bot.number = float(message.text)
 	except:  bot.number = None
 
-	if not bot.number and hasattr(bot,'label'):
-		
-
-		if len(set(bot.measures_cleaned) & set([message.text])) >0:
-			bot.measurement = message.text
-			markup = types.ReplyKeyboardMarkup(row_width=2)
-			if bot.measurement == 'gram': [markup.add(str(p)) for p in range(10,400,10)]
-			else:[markup.add(str(p)) for p in [0.5,1,1.5,2,3,4,5,6,7,8,9,10]]
-			cancel = types.KeyboardButton('/cancel')
-			markup.add(cancel)
-			bot.reply_to(message, f"select number of {bot.measurement}s you are going to eat", reply_markup=markup)
-
-		else:
-			bot.reply_to(message, f"please choose a unit from the list")
-
-
-
-	
-
-	elif bot.number and hasattr(bot,'label'): 
+	if bot.number and hasattr(bot,'label'): 
 		if bot.measurement == 'gram': grams = bot.number
 		else:grams = bot.measures[bot.measures['portion_description'].str.contains(bot.measurement, regex=False)]['gram_weight'].iloc[0]*bot.number
 		bot.dish[['energy','protein','carb','fat']] = bot.dish[['energy','protein','carb','fat']]/100*grams
 		bot.dish['grams']=grams
 		bot.dish['measure_selected'] = message.text
-		bot.dish = bot.dish.rename(columns = {'id':'food_id'})
 		bot.dish['timestamp']=pd.Timestamp.utcnow()
-		bot.dish = bot.dish[['food_id', 'description', 'category', 'energy', 'protein', 'carb',
+		bot.dish['category'] = 'nan'
+		bot.dish['food_id'] = 9999
+		bot.dish = bot.dish[[ 'description', 'category', 'energy', 'protein', 'carb',
 								'fat', 'score', 'image_url', 'user_id', 'grams', 'measure_selected',
-								'timestamp']]
+								'timestamp','food_id']]
 
 		bot.dish.to_sql(dishes,engine,if_exists='append',index=False,schema = 'food')
 
@@ -183,7 +162,6 @@ def handle_text(message):
 		bot.reply_to(message, f"You have consumed {round(today_consumed)} kcall today", reply_markup=markup)
 
 		del bot.dish
-		del bot.measures
 		del bot.measurement
 		del bot.label
 
