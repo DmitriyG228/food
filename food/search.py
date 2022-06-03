@@ -20,7 +20,7 @@ import numpy as np
 from PIL import Image
 
 # Cell
-collection_name = 'food_prompted'
+collection_name = 'food_images'
 table = 'foods_prompted'
 foods = read_sql(table)
 foods = foods.set_index('id')
@@ -32,7 +32,8 @@ def read_image_from_url(url=None):
 
 
 # Cell
-def search_image_(url=None,head = 1):
+def search_image_(url=None,head = 1,env='dev'):
+    client = dev_client if env == 'dev' else prod_client
     image_clip = requests.post(f'https://guru.skynet.center/image2vector/?url={url}').json()
     results = client.search(collection_name=collection_name,query_vector=image_clip,top=head)
     image_clip = torch.Tensor(image_clip)
@@ -52,9 +53,9 @@ def multiply_vector(clip,i,n=1):
     return torch.cat([clip, duplicated.reshape(n,768)])
 
 # Cell
-def multiple_foods(url):
+def multiple_foods(url,env='dev'):
 
-    image_clip,selected = search_image_(url,head=100)
+    image_clip,selected = search_image_(url,head=100,env=env)
     selected=selected.reset_index(drop=True)
     clip = series2tensor(selected['clip'])
     initscore = cos(image_clip.reshape(1,768), clip.mean(0).reshape(1,768))
@@ -98,8 +99,8 @@ def multiple_foods(url):
     return r.drop(columns = ['clip']), description, selected,initscore
 
 # Cell
-def search_image(url):
-    r, desc, sel,score = multiple_foods(url)
+def search_image(url,env='dev'):
+    r, desc, sel,score = multiple_foods(url,env=env)
     df = sel[['energy','protein','carb','fat','score']].mean().to_frame().T
     df['score'] =score
     df['description'] = desc

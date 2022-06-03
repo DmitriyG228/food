@@ -14,19 +14,30 @@ from food.qdrant import *
 
 project_name = "food"
 table = 'foods_prompted'
-collection_name = 'food_prompted'
+image_table = 'foods_prompted_images'
+collection_name = 'food_images'
 dim = 768
 limit = 100000
 
+client = dev_client
 
 
-query = f"""select f.id,f.description, f.clip as clip
-        FROM      {project_name}.{table}    f
-        LEFT JOIN {project_name}.indexed  i  ON (i.id =       f.id)
+
+# query = f"""select f.id,f.description, im.*
+#         FROM      {project_name}.{table}    f
+#         LEFT JOIN {project_name}.indexed      i  ON  (i.id =             f.id)
+#         LEFT JOIN {project_name}.image_table  im  ON (im.food_id =       f.id)
         
-        WHERE clip    is not null and 
-              i .indexed is null
-        """
+#         WHERE clip    is not null and 
+#               i .indexed is null
+#         """
+
+query = f"""select f.id, im.clip
+        FROM      {project_name}.{table}    f
+        LEFT JOIN {project_name}.indexed      i  ON  (i.id =             f.id)
+        LEFT JOIN {project_name}.{image_table}  im  ON (im.food_id =       f.id)
+        
+        WHERE im.clip    is not null"""
 
 
 
@@ -49,7 +60,7 @@ for df in tqdm(cpd.read_sql_query(query, engine, chunksize=limit), desc="qdrant_
         parallel=4
     )
 
-    to_insert = df[['id']]
-    to_insert['indexed'] = True
-    to_insert.to_sql("{project_name}.indexed",engine,index=False,if_exists = 'append',method = 'multi')
+    # to_insert = df[['id']]
+    # to_insert['indexed'] = True
+    # to_insert.to_sql("{project_name}.indexed",engine,index=False,if_exists = 'append',method = 'multi')
 

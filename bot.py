@@ -100,7 +100,7 @@ def calssify_image(message):
 	
 	image_url = bot.get_file_url(message.photo[3].file_id)
 	to_pickle(image_url,'image_url')
-	bot.dish = search_image(url=image_url)
+	bot.dish = search_image(url=image_url,env='prod')
 	bot.dish['image_url'] = image_url
 	bot.dish['user_id']= message.from_user.id
 
