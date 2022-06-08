@@ -35,3 +35,4 @@ dependencies:
     - nbdev
     - pyTelegramBotAPI
     - qdrant_client
+    - tzwhere

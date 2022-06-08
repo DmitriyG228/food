@@ -98,7 +98,7 @@ def calssify_image(message):
 
 	bot.send_chat_action(message.chat.id, 'typing')
 	
-	image_url = bot.get_file_url(message.photo[3].file_id)
+	image_url = bot.get_file_url(message.photo[-1].file_id)
 	to_pickle(image_url,'image_url')
 	bot.dish = search_image(url=image_url,env='prod')
 	bot.dish['image_url'] = image_url
