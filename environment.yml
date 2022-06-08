@@ -1,4 +1,5 @@
-name: food
+#conda env update --file environment.yml --prune
+name: food_product
 channels:
   - pytorch
   - defaults
@@ -14,7 +15,6 @@ dependencies:
   - SQLAlchemy
   - pandas
   - Pillow
-  - voila
   - fastapi
   - uvicorn
   - pip:
@@ -34,3 +34,4 @@ dependencies:
     - wrapt
     - nbdev
     - pyTelegramBotAPI
+    - qdrant_client
