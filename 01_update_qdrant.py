@@ -32,7 +32,7 @@ client = prod_client
 #               i .indexed is null
 #         """
 
-query = f"""select *
+query = f"""select f.id, im.clip, f.description
         FROM      {project_name}.{table}    f
         LEFT JOIN {project_name}.indexed      i  ON  (i.id =             f.id)
         LEFT JOIN {project_name}.{image_table}  im  ON (im.food_id =       f.id)
