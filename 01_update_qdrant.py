@@ -19,7 +19,7 @@ collection_name = 'food_images'
 dim = 768
 limit = 100000
 
-client = dev_client
+client = prod_client
 
 
 
@@ -32,7 +32,7 @@ client = dev_client
 #               i .indexed is null
 #         """
 
-query = f"""select f.id, im.clip
+query = f"""select *
         FROM      {project_name}.{table}    f
         LEFT JOIN {project_name}.indexed      i  ON  (i.id =             f.id)
         LEFT JOIN {project_name}.{image_table}  im  ON (im.food_id =       f.id)
