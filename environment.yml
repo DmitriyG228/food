@@ -31,7 +31,6 @@ dependencies:
     - schedule
     - psutil
     - docker
-    - pymilvus
     - wrapt
     - nbdev
     - pyTelegramBotAPI
