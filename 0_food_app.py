@@ -1,4 +1,4 @@
-# cd; cd food; git checkout production; conda activate food_product;  python 0_food_app.py &>>$HOME/app1.log & disown
+# cd; conda activate food; cd food; python 0_food_app.py &>>$HOME/app1.log & disown
 from tendo import singleton
 me = singleton.SingleInstance()
 
@@ -22,12 +22,18 @@ from functools import partial
 
 bash_command       = lambda x : os.system(f'cd $HOME/food; conda run -n food python "{x}".py &>>$HOME/"{x}".log')
 kill_command       = lambda x : os.system(f'pkill -f {x}')
+start_docker       = lambda x :  docker_container(x).start()
+
+
 scheduler = schedule.Scheduler()
 
 constant_procs = ['bot']
 [scheduler.every(5).seconds.do(partial(bash_command,p)) for p in constant_procs]
 
+[scheduler.every(5).seconds.do(partial(start_docker,p)) for p in ['dima_re_postgres','qdrant_prod']]
+
 while True: 
     scheduler.run_pending()
     sleep(5)
+
 
