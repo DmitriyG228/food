@@ -53,7 +53,6 @@ def multiply_vector(clip,i,n=1):
     return torch.cat([clip, duplicated.reshape(n,768)])
 
 # Cell
-
 def multiple_foods(url,env='dev'):
 
     image_clip,selected = search_image_(url,head=100,env=env)
