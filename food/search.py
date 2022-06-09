@@ -26,9 +26,11 @@ foods = read_sql(table)
 foods = foods.set_index('id')
 
 # Cell
-def read_image_from_url(url=None):
-    response = requests.get(url, stream=True)
+def read_image_from_url(url=None,path=None):
+    if url: response = requests.get(url, stream=True)
+    if path: pass
     return Image.open(response.raw)
+
 
 
 # Cell
@@ -58,18 +60,18 @@ def multiple_foods(url,env='dev'):
     image_clip,selected = search_image_(url,head=100,env=env)
     selected=selected.reset_index(drop=True)
     clip = series2tensor(selected['clip'])
-    initscore = cos(image_clip.reshape(1,768), clip.mean(0).reshape(1,768))
-
-    startscore = initscore.detach().clone()-0.0000001
+    initscore = float(cos(image_clip.reshape(1,768), clip.mean(0).reshape(1,768)).detach().clone())
+    startscore = initscore-0.0000001
+    n=0
 
     while startscore !=initscore:
-        startscore = initscore.detach().clone()
+        startscore = initscore
 
         selected = selected.reset_index(drop=True)
         for i in reversed(selected.index):
             clip = series2tensor(selected['clip'])
             dropped = drop_vector(clip,i)
-            testscore = cos(image_clip.reshape(1,768), dropped.mean(0).reshape(1,768))
+            testscore = float(cos(image_clip.reshape(1,768), dropped.mean(0).reshape(1,768)).detach().clone())
 
             if testscore > initscore-0.0001:
                 r = selected.loc[i,'text']
@@ -78,13 +80,13 @@ def multiple_foods(url,env='dev'):
 
             else:
                 extra = multiply_vector(clip,i,1)
-                testscore = cos(image_clip.reshape(1,768), extra.mean(0).reshape(1,768))
+                testscore = float(cos(image_clip.reshape(1,768), extra.mean(0).reshape(1,768)).detach().clone())
                 if testscore > initscore:
                     selected = selected.append(selected.loc[i])
                     initscore = testscore
 
-
-
+            n+=1
+            if n ==15:break
 
         print(initscore)
     count = selected.groupby('text')['clip'].count().sort_index()
