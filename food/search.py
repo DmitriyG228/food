@@ -98,6 +98,7 @@ def multiple_foods(url,env='dev'):
 
     return r.drop(columns = ['clip']), description, selected,initscore
 
+
 # Cell
 def search_image(url,env='dev'):
     r, desc, sel,score = multiple_foods(url,env=env)
