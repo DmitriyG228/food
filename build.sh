@@ -1,3 +1,6 @@
+### dev server
+
+
 ## edit .ssh/config ip address
 ## open vscode and ssh to remote
 ## git clone ab
@@ -44,7 +47,7 @@
 
 # docker container postgis
 sudo docker pull postgis/postgis
-sudo docker run --name dima_re_postgres -e POSTGRES_PASSWORD=KJnbuiwuef89k -d -p 5432:5432 postgis/postgis
+sudo docker run --name dima_postgres_dev -e POSTGRES_PASSWORD=KJnbuiwuef89k -d -p 5434:5432 postgis/postgis 
 
 
 # github 
