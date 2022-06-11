@@ -28,9 +28,11 @@ start_docker       = lambda x :  docker_container(x).start()
 scheduler = schedule.Scheduler()
 
 constant_procs = ['bot']
+
+docker_containers = ['psql_food_prod','qdrant_prod']
 [scheduler.every(5).seconds.do(partial(bash_command,p)) for p in constant_procs]
 
-[scheduler.every(5).seconds.do(partial(start_docker,p)) for p in ['dima_re_postgres','qdrant_prod']]
+[scheduler.every(5).seconds.do(partial(start_docker,p)) for p in docker_containers]
 
 while True: 
     scheduler.run_pending()
