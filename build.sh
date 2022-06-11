@@ -43,8 +43,8 @@
 
 
 # docker container postgis
-sudo docker pull postgis/postgis
-sudo docker run --name dima_re_postgres -e POSTGRES_PASSWORD=KJnbuiwuef89k -d -p 5432:5432 postgis/postgis
+docker pull postgres
+sudo docker run --name psql_food_prod -e POSTGRES_PASSWORD=KJnbuiwuef89k -d -p 5434:5432 postgres
 
 
 # github 
