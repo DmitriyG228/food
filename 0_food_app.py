@@ -20,7 +20,7 @@ from pathlib import Path
 import os
 from functools import partial
 
-bash_command       = lambda x : os.system(f'cd $HOME/food; conda run -n food python "{x}".py &>>$HOME/"{x}".log')
+bash_command       = lambda x : os.system(f'cd $HOME/food_prod; conda run -n food_product python "{x}".py &>>$HOME/"{x}".log')
 kill_command       = lambda x : os.system(f'pkill -f {x}')
 start_docker       = lambda x :  docker_container(x).start()
 
@@ -30,8 +30,8 @@ scheduler = schedule.Scheduler()
 constant_procs = ['bot']
 
 docker_containers = ['psql_food_prod','qdrant_prod']
-[scheduler.every(5).seconds.do(partial(bash_command,p)) for p in constant_procs]
 
+[scheduler.every(5).seconds.do(partial(bash_command,p)) for p in constant_procs]
 [scheduler.every(5).seconds.do(partial(start_docker,p)) for p in docker_containers]
 
 while True: 
