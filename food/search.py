@@ -93,9 +93,9 @@ def multiple_foods(url,env='dev'):
     r = selected.drop_duplicates('text').set_index("text").sort_index()
     r['count'] = count
     r = r.sort_values('count',ascending = False)
-    r['cumcount'] = r['count'].cumsum()/r['count'].sum()
+    r['share'] = r['count'].cumsum()/r['count'].sum()
 
-    description = '. '.join(r[r['cumcount']<0.9]['description'].unique().tolist())
+    description = '. '.join(r[r['share']<0.9]['description'].unique().tolist())
 
 
     return r.drop(columns = ['clip']), description, selected,initscore
@@ -107,4 +107,4 @@ def search_image(url,env='dev'):
     df = sel[['energy','protein','carb','fat','score']].mean().to_frame().T
     df['score'] =score
     df['description'] = desc
-    return df.round()
+    return df

@@ -72,7 +72,7 @@ def location(message):
               tz]],
               columns = ['id','lat','lon','timezone'])
 
-	insert_ignore(df,f'food.{users}',update = True, update_cols = ['lat','lon','timezone'], engine = engine,unique_cols=['id'])
+	insert_on_conflict(df,f'food.{users}',update = True, update_cols = ['lat','lon','timezone'], engine = engine,unique_cols=['id'])
 	bot.reply_to(message, f"your timezone is set to {tz}")
 
 
