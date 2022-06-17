@@ -127,23 +127,21 @@ def docker_container(name):
 # Cell
 class LogDBHandler(logging.Handler):
 
-    def __init__(self,sql_table,script_name,engine):
-        self.sql_table,self.engine,self.script_name = sql_table,engine,script_name
+    def __init__(self,engine,sql_table,schema):
+        self.engine,self.sql_table,self.schema = engine,sql_table,schema
         logging.Handler.__init__(self)
 
     def emit(self, record):
-        df = pd.DataFrame({'level_no':[record.levelname],
-                           'msg':[str(record.msg)],
-                           'name':[record.name],
-                           'timestamp':[pd.Timestamp.utcnow()],
-                           'script_name':[self.script_name]})
-        df.to_sql(self.sql_table,self.engine,if_exists='append',index=False)
+        df = pd.DataFrame(record.msg,index = [0])
+        df['level_no'] = record.levelname
+        df['timestamp'] = pd.Timestamp.utcnow()
+        df.to_sql(self.sql_table,self.engine,if_exists='append',index=False,schema = self.schema)
 
 # Cell
-def get_logger(name,sql_logs='logs',return_handler=False):
+def get_logger(engine,sql_table,schema,return_handler=False):
     logger = logging.getLogger('main')
     logger.setLevel(logging.DEBUG)
-    bd_handler = LogDBHandler(sql_logs,name,engine)
+    bd_handler = LogDBHandler(engine,sql_table,schema)
     logger.addHandler(bd_handler)
     if return_handler: return logger,bd_handler
     else:              return logger
