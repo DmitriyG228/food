@@ -18,7 +18,10 @@ import typing
 import numpy as np
 
 
-API_TOKEN = "5091011572:AAG4NfkC_zZjcsaAFkwLm4ZXOvhEqyLpQhY"
+from food.paths import *
+
+
+API_TOKEN = bot_token
 
 from food.paths import *
 from food.search import *
