@@ -15,6 +15,7 @@ dependencies:
   - SQLAlchemy
   - pandas
   - Pillow
+  - voila
   - fastapi
   - uvicorn
   - pip:
@@ -33,6 +34,6 @@ dependencies:
     - docker
     - wrapt
     - nbdev
-    - pyTelegramBotAPI
+    - aiogram
     - qdrant_client
     - tzwhere
