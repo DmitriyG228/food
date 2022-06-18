@@ -34,5 +34,4 @@ dependencies:
     - pymilvus
     - wrapt
     - nbdev
-    - pyTelegramBotAPI
     - aiogram
