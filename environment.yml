@@ -1,3 +1,4 @@
+#conda env update --file environment.yml --prune
 name: food
 channels:
   - pytorch
