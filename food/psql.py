@@ -2,7 +2,7 @@
 
 __all__ = ['engine', 'Session', 'session', 'Base', 'du', 'query', 'current', 'kill', 'schema', 'LocalBase',
            'insert_on_conflict', 'read_sql', 'Foods', 'Users', 'Dishes', 'User_properties', 'FoodsP', 'FoodsPI',
-           'FFoods', 'Food_reference_images', 'Portions', 'Indexed']
+           'Indexed']
 
 # Cell
 from sqlalchemy import create_engine
@@ -44,7 +44,7 @@ from sqlalchemy.dialects.postgresql import REAL
 from sqlalchemy import cast
 
 # Cell
-engine = create_engine('postgresql+psycopg2://postgres:KJnbuiwuef89k@localhost/postgres?port=5432',pool_size=64) #dev engine
+engine = create_engine('postgresql+psycopg2://postgres:KJnbuiwuef89k@localhost/postgres?port=5435',pool_size=64) #dev engine
 Session = sessionmaker(bind=engine)
 session = Session()
 Base = declarative_base()
@@ -199,32 +199,6 @@ class FoodsPI (LocalBase):
     accuracy            = Column(Float,          nullable=True)
 
     clip                = Column(ARRAY(REAL),          nullable=False)
-
-# Cell
-class FFoods (LocalBase):
-    __tablename__ = 'fundation_foods'
-    id                  = Column(BIGINT, primary_key=True)
-    description         = Column(String,          nullable=False)
-
-    clip                = Column(ARRAY(REAL),          nullable=True)
-
-# Cell
-class Food_reference_images (LocalBase):
-    __tablename__ = 'food_reference_images'
-    id                  = Column(BIGINT, primary_key=True)
-    food_id             = Column(BIGINT,   nullable=False)
-    image_url           = Column(String,   nullable=False)
-    file_name           = Column(String,   nullable=False)
-
-    clip                = Column(ARRAY(REAL),          nullable=True)
-
-# Cell
-class Portions (LocalBase):
-    __tablename__ = 'portions'
-    id                    = Column(BIGINT, primary_key = True)
-    food_id               = Column(BIGINT ,nullable    = False)
-    portion_description   = Column(String, nullable    = False)
-    gram_weight           = Column(Float,  nullable    = False)
 
 # Cell
 class Indexed (LocalBase):
