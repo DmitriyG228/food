@@ -2,7 +2,7 @@ stage = 'food_prod'
 
 
 
-# cd; conda activate food_product; cd food_preprod; python 0_food_app.py &>>$HOME/app1.log & disown
+# cd; conda activate food_product; cd food_prod; python 0_food_app.py &>>$HOME/app1.log & disown
 from tendo import singleton
 me = singleton.SingleInstance()
 
