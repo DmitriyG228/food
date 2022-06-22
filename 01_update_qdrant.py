@@ -14,7 +14,7 @@ from food.qdrant import *
 
 project_name = "food"
 table = 'foods_prompted'
-image_table = 'foods_prompted_images'
+image_table = 'foods_prompted_images_new'
 collection_name = 'food_images'
 dim = 768
 limit = 100000
@@ -32,12 +32,10 @@ client = dev_client
 #               i .indexed is null
 #         """
 
-query = f"""select f.id, im.clip
-        FROM      {project_name}.{table}    f
-        LEFT JOIN {project_name}.indexed      i  ON  (i.id =             f.id)
-        LEFT JOIN {project_name}.{image_table}  im  ON (im.food_id =       f.id)
+query = f"""select f.id,f.food_id,f.clip
+        FROM      {project_name}.{image_table}    f
         
-        WHERE im.clip    is not null"""
+        WHERE f.clip    is not null"""
 
 
 

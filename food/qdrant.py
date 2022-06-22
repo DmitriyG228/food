@@ -15,6 +15,10 @@ from qdrant_client import QdrantClient
 import qdrant_client
 collection_name = "food_images"
 
+# collection_name = "food_categories"
+
+
+
 # Cell
 dim = 768 #+ onehot.n_dim()
 QdrantClient.get_collections = lambda self: [c['name'] for c in self.http.collections_api.get_collections().dict()['result']['collections']]
