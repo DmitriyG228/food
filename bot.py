@@ -102,7 +102,7 @@ measurment_cb = CallbackData('measurment', 'weight')
 edit_dish_cb  = CallbackData('edit_dish', 'action')
 choose_metr_cb  = CallbackData('choose_metr', 'choice')
 
-ml_version = 0.2
+ml_version = 0.3
 
 
 set_timezone_command = types.BotCommand('set_timezone','set you timezone so that we know when your day starts')
