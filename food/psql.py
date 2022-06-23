@@ -139,7 +139,7 @@ class Users (LocalBase):
     id                  = Column(BIGINT,     primary_key=True)
     first_name          = Column(String,     nullable=False)
     last_name           = Column(String,     nullable=False)
-    username            = Column(String,     nullable=False)
+    username            = Column(String,     nullable=True)
     language_code       = Column(String,     nullable=False)
 
 
