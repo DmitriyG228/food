@@ -14,7 +14,7 @@ mapbox_access_token = 'pk.eyJ1IjoiZGltYWRnbyIsImEiOiJjanYydDF2dTkwdnFzNDNwOXFuNz
 
 # Cell
 
-branch = 'dev'
+branch = 'prod'
 bot_token = '5203882708:AAG3G_Y2oZSr-rMG2zoffDVtj3d0KkOFSts'   if branch == 'prod' else "5091011572:AAG4NfkC_zZjcsaAFkwLm4ZXOvhEqyLpQhY"
 
 

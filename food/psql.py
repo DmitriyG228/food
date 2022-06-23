@@ -48,7 +48,7 @@ print(branch)
 
 # Cell
 
-port = 5432 if branch == 'prod' else 5435
+port = 5434 if branch == 'prod' else 5432
 
 
 engine = create_engine(f'postgresql+psycopg2://postgres:KJnbuiwuef89k@localhost/postgres?port={port}',pool_size=64) #dev engine
@@ -144,10 +144,10 @@ class Foods (LocalBase):
 class Users (LocalBase):
     __tablename__ = 'users'
     id                  = Column(BIGINT,     primary_key=True)
-    first_name          = Column(String,     nullable=False)
-    last_name           = Column(String,     nullable=False)
+    first_name          = Column(String,     nullable=True)
+    last_name           = Column(String,     nullable=True)
     username            = Column(String,     nullable=True)
-    language_code       = Column(String,     nullable=False)
+    language_code       = Column(String,     nullable=True)
 
 
 # Cell
