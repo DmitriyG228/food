@@ -27,4 +27,4 @@ QdrantClient.collection_len = lambda self, name: self.http.collections_api.get_c
 # Cell
 prod_client = QdrantClient(host='localhost', port=6335)
 dev_client  = QdrantClient(host='localhost', port=6334)
-client = prod_client
+client = prod_client if branch == "prod" else dev_client
