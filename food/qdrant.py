@@ -13,7 +13,8 @@ from tqdm import tqdm
 
 from qdrant_client import QdrantClient
 import qdrant_client
-collection_name = "food_images"
+# collection_name = "food_images"
+collection_name = "food_text"
 
 # collection_name = "food_categories"
 

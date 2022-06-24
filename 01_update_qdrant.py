@@ -13,13 +13,13 @@ from food.qdrant import *
 
 
 project_name = "food"
-table = 'foods_prompted'
-image_table = 'foods_prompted_images'
+table = 'food'
+table = 'foods_prompted_images'
 collection_name = 'food_images'
 dim = 768
 limit = 100000
 
-client = prod_client
+# client = prod_client
 
 
 
@@ -33,7 +33,7 @@ client = prod_client
 #         """
 
 query = f"""select f.id,f.food_id,f.clip
-        FROM      {project_name}.{image_table}    f
+        FROM      {project_name}.{table}    f
         
         WHERE f.clip    is not null"""
 
