@@ -33,7 +33,7 @@ scheduler = schedule.Scheduler()
 
 constant_procs = ['bot']
 
-docker_containers = ['psql_food_prod','qdrant_prod_2206']
+docker_containers = ['psql_food_prod','qdrant_prod']
 
 [scheduler.every(5).seconds.do(partial(bash_command,p)) for p in constant_procs]
 [scheduler.every(5).seconds.do(partial(start_docker,p)) for p in docker_containers]

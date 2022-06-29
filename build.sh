@@ -56,8 +56,8 @@ sudo docker run --name psql_food_prod -e POSTGRES_PASSWORD=KJnbuiwuef89k -d -p 5
 
 # # ### conda env
 # conda init bash
-# conda env create
-# # conda env update --file environment.yml --prune
+conda env create
+# conda env update --file environment.yml --prune
 # source $HOME/anaconda3/etc/profile.d/conda.sh
 # conda activate ab
 # conda install ipykernel

@@ -37,7 +37,7 @@ def read_image_from_url(url=None,path=None):
 # Cell
 def search_image_(url=None,head = 1,env='dev'):
     client = dev_client if env == 'dev' else prod_client
-    image_clip = requests.post(f'https://guru.skynet.center/image2vector/?url={url}').json()
+    image_clip = requests.post(f'{clipapi_url}/image2vector/?url={url}').json()
     results = client.search(collection_name=collection_name,query_vector=image_clip,top=head)
     image_clip = torch.Tensor(image_clip)
     df = foods.loc[[r.id for r in results]].copy()
