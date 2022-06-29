@@ -1,5 +1,5 @@
 #conda env update --file environment.yml --prune
-name: food_product
+name: food
 channels:
   - pytorch
   - defaults

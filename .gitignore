@@ -1,5 +1,6 @@
 __pycache__/
 food/__pycache__/
 qdrant_storage/
+.vscode/
 image_url
 condaenv.xr8bzr_e.requirements.txt
