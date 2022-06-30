@@ -39,7 +39,7 @@ query = f"""select f.id,f.food_id,f.clip
 
 
 
-for df in tqdm(cpd.read_sql_query(query, engine, chunksize=limit), desc="qdrant_update {project_name}"):
+for df in tqdm(cpd.read_sql_query(query, engine, chunksize=limit), desc=f"qdrant_update {project_name}"):
 
     ids = df['id'].tolist()
     clip = df['clip']
