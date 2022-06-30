@@ -1,5 +1,7 @@
 __pycache__/
 food/__pycache__/
 qdrant_storage/
+qdrant_prod_storage/
+.vscode/
 test_result.pkl
 image_url
