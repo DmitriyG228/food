@@ -21,6 +21,6 @@ bot_token = '5203882708:AAG3G_Y2oZSr-rMG2zoffDVtj3d0KkOFSts'   if branch == 'pro
 
 # Cell
 main_path                       = Path(os.getenv("HOME"))
-data_path                       = Path(main_path/'ssd/food')
+data_path                       = Path(main_path/'data/food')
 reference_images_path           = Path(data_path/'reference_images')
 fragment_reference_images_path  = Path(data_path/'fragment_reference_images')

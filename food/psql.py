@@ -48,7 +48,7 @@ print(branch)
 
 # Cell
 
-port = 5434 if branch == 'prod' else 5432
+port = 5434 if branch == 'prod' else 5433
 
 
 engine = create_engine(f'postgresql+psycopg2://postgres:KJnbuiwuef89k@localhost/postgres?port={port}',pool_size=64) #dev engine
