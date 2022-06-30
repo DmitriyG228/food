@@ -22,5 +22,5 @@ clipapi_url = 'http://127.0.0.1:8182'
 
 # Cell
 main_path              = Path(os.getenv("HOME"))
-data_path              = Path(main_path/'ssd/food')
+data_path              = Path(main_path/'data/food')
 reference_images_path  = Path(data_path/'reference_images')

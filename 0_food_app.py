@@ -16,7 +16,6 @@ from time import sleep
 
 ######default_exp psql
 
-from food.tools import docker_container
 import os
 os.environ['MKL_THREADING_LAYER'] = 'GNU'
 import schedule
