@@ -5,3 +5,4 @@ qdrant_prod_storage/
 .vscode/
 test_result.pkl
 image_url
+food_dataset/
