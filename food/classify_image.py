@@ -16,7 +16,7 @@ foods = foods.set_index('id')
 
 # Cell
 def search_image(url=None,head = 1):
-    image_clip = requests.post(f'https://guru.skynet.center/image2vector/?url={url}').json()
+    image_clip = requests.post(f'http://127.0.0.1:8182/image2vector/?url={url}').json()
     results = client.search(collection_name=collection_name,query_vector=image_clip,top=head)
     image_clip = torch.Tensor(image_clip)
     df = foods.loc[[r.id for r in results]].copy()
