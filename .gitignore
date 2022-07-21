@@ -6,3 +6,5 @@ qdrant_prod_storage/
 food_dataset/
 image_url
 qdrant_storage_dev/
+saved_models/*
+00_nbs/.ipynb_checkpoints/
