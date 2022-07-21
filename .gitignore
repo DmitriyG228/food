@@ -5,4 +5,4 @@ qdrant_prod_storage/
 .vscode/
 food_dataset/
 image_url
-condaenv.xr8bzr_e.requirements.txt
+qdrant_storage_dev/

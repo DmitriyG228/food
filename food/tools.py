@@ -21,8 +21,9 @@ from PIL import Image
 import requests
 
 # Cell
-def get_image_from_url(url):
-    response = requests.get(url, stream=True)
+def get_image_from_url(url,path = None):
+    if url: response = requests.get(url, stream=True)
+    if path: pass
     return Image.open(response.raw)
 
 # Cell
