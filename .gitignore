@@ -8,3 +8,5 @@ image_url
 qdrant_storage_dev/
 saved_models/*
 00_nbs/.ipynb_checkpoints/
+food/.ipynb_checkpoints/
+

@@ -23,10 +23,20 @@ index = {"branch": "00_paths.ipynb",
          "User_properties": "00_psql.ipynb",
          "FoodsP": "00_psql.ipynb",
          "FoodsPI": "00_psql.ipynb",
-         "Indexed": "00_psql.ipynb"}
+         "Indexed": "00_psql.ipynb",
+         "mean_filter": "00_visual.ipynb",
+         "visualize_array": "00_visual.ipynb",
+         "extrapolate": "00_visual.ipynb",
+         "expand_boundaries": "00_visual.ipynb",
+         "crop_center_arr": "00_visual.ipynb",
+         "apply_mask": "00_visual.ipynb",
+         "crop_zeros": "00_visual.ipynb",
+         "crop_image_to_square": "00_visual.ipynb",
+         "search_clip": "00_visual.ipynb"}
 
 modules = ["paths.py",
-           "psql.py"]
+           "psql.py",
+           "visual.py"]
 
 doc_url = "https://{user}.github.io/food/"
 
