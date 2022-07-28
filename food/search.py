@@ -18,9 +18,10 @@ from stego.segment import get_food_segment
 from segmentor.segment import *
 
 from mytools.visual import *
+from .depth import *
 
 # Cell
-bad_cats = ['Vegetables on a sandwich','Candy containing chocolate','Baby juice']
+bad_cats  = ['Vegetables on a sandwich','Candy containing chocolate','Baby juice']
 bad_descs = ['Banana, fried']
 
 
@@ -72,29 +73,35 @@ def search(url):
         clip_df = clip_df.append(search_clip(u,foods,food_clips,head = 1)[1])
     clip_df=clip_df.reset_index(drop=True)
     clip_df['classes'] = classes+[1]
+    clip_df=clip_df[clip_df['score']>0.22]
 
     mask = stego_mask+segmentor_mask
-    calorie_mask   = mask
-    fat_mask       = mask
-    carbs_mask     = mask
-    protein_mask   = mask
-
 
     dicts =[]
     masks =[]
 
+    #create masks of attributes
     for col in ['energy','protein','carb','fat']:
         dicts.append(clip_df[['classes',col]].set_index("classes")[col].to_dict())
         masks.append(torch.clone(mask))
 
+    areas = {}
     for c in np.unique(mask):
+        areas[c]= mask[mask==c].shape[0]
+
+        #clean values where classes are filtered out
         if c not in dicts[0].keys():
-            for mask in masks:
-                mask[mask==c]=0
+            for m in masks:
+                m[m==c]=0
+
+    #areas
+    clip_df = clip_df.merge(pd.DataFrame(areas,index = ['area']).T,left_on = 'classes',right_index = True)
+    clip_df['area'] = clip_df['area']/clip_df['area'].sum()
+    clip_df = clip_df.sort_values('area',ascending = False)
+
+    #assign values to the masks
+    for d,m in zip(dicts,masks):
+        for k,v in d.items(): m[m == k] = v
 
 
-    for d,mask in zip(dicts,masks):
-        for k,v in d.items(): mask[mask == k] = v
-
-
-    return img,clip_df,masks
+    return img,clip_df,masks,urls
