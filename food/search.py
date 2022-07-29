@@ -80,8 +80,9 @@ def search(url):
     dicts =[]
     masks =[]
 
+    attributes = ['energy','protein','carb','fat']
     #create masks of attributes
-    for col in ['energy','protein','carb','fat']:
+    for col in attributes:
         dicts.append(clip_df[['classes',col]].set_index("classes")[col].to_dict())
         masks.append(torch.clone(mask))
 
@@ -103,5 +104,25 @@ def search(url):
     for d,m in zip(dicts,masks):
         for k,v in d.items(): m[m == k] = v
 
+    stats = pd.DataFrame([float(m[m!=0].mean()) for m in masks]+[masks[0][masks[0]!=0].shape[0]],
+                     index = attributes+['size'])
 
-    return img,clip_df,masks,urls
+    img = np.array(img)
+
+    mask = mask.numpy().astype(np.uint8)
+    true_points = np.argwhere(np.array(img)+np.stack([mask]*3).T)
+    top_left = true_points.min(axis=0)
+    bottom_right = true_points.max(axis=0)
+
+    img = img[top_left[0]:bottom_right[0]+1,
+              top_left[1]:bottom_right[1]+1]
+
+    img = Image.fromarray(img.astype(np.uint8))
+
+    masks_ = []
+    for mask in masks:
+        masks_.append(mask[top_left[0]:bottom_right[0]+1,
+                    top_left[1]:bottom_right[1]+1])
+    masks = masks_
+
+    return img,clip_df,masks,urls,stats
