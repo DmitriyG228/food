@@ -61,14 +61,17 @@ async def add_sender(message):
     sender = message['from'].to_python()
     sender = pd.DataFrame(sender,index=[0]).drop(columns =['is_bot'])
     await async_insert_on_conflict(sender,'users',unique_cols=['id'])
-def get_msg(query):
+
+#
+def get_msg(query): 
     dish = pd.read_sql(f"""select energy,protein,carb,fat from food.dishes 
                                 where user_id={query['from']['id']} and 
                                 message_id = {query['message']['message_id']}
                                 order by id desc limit 1""",engine)
-    plot_numtients = dish[['energy','protein','carb','fat']].reset_index(drop=True)
-    plot_numtients.index = ['']
-    return plot_numtients.astype(int).to_string()
+    plot_nutients = dish[['energy','protein','carb','fat']].reset_index(drop=True)
+    plot_nutients.index = ['']
+    return plot_nutients.astype(int).to_string()
+    
 def get_today_consumed(user_id):
     today_consumed = pd.read_sql(f"""select energy,grams,timestamp from {schema}.dishes
                                     where user_id = {user_id} and timestamp > now() - interval '24 hours'
@@ -97,9 +100,9 @@ dp = Dispatcher(bot, storage=storage)
 
 dishes_table = Dishes.__table__
 
-add_dish_cb   = CallbackData('add dish', 'action')
-measurment_cb = CallbackData('measurment', 'weight')
-edit_dish_cb  = CallbackData('edit_dish', 'action')
+add_dish_cb     = CallbackData('add dish', 'action')
+measurment_cb   = CallbackData('measurment', 'weight')
+edit_dish_cb    = CallbackData('edit_dish', 'action')
 choose_metr_cb  = CallbackData('choose_metr', 'choice')
 
 ml_version = 0.3
@@ -204,12 +207,12 @@ async def process_photo(message: types.Message, state: FSMContext):
     dish['timestamp']=pd.Timestamp.utcnow()
 
     
-    plot_numtients = dish[['energy','protein','carb','fat']].reset_index(drop=True)
-    plot_numtients.index = ['']
+    plot_nutients = dish[['energy','protein','carb','fat']].reset_index(drop=True)
+    plot_nutients.index = ['']
 
-    msg = f'{description}, per 100 gram \n {plot_numtients.astype(int).to_string()}'
+    msg = f'{description}, per 100 gram \n {plot_nutients.astype(int).to_string()}'
     
-    # msg = description + '\n'+ plot_numtients.astype(int).to_string()
+    # msg = description + '\n'+ plot_nutients.astype(int).to_string()
 
     reply_message = await message.reply(msg, reply_markup=get_keyboard('add dish'))
     dish['message_id'] = reply_message['message_id']

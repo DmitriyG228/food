@@ -50,7 +50,7 @@ from mytools.psql import *
 
 # Cell
 
-port = 5434# if branch == 'prod' else 5431
+port = 5434 if branch == 'prod' else 5431
 
 
 engine = create_engine(f'postgresql+psycopg2://postgres:KJnbuiwuef89k@localhost/postgres?port={port}',pool_size=64) #dev engine
@@ -103,11 +103,13 @@ class Users (LocalBase):
 class Dishes (LocalBase):
     __tablename__ = 'dishes'
     id                   = Column(BIGINT,  primary_key=True, autoincrement = True)
-    description          = Column(String,   nullable=False)
-    energy               = Column(Float,    nullable=False)
-    protein              = Column(Float,    nullable=False)
-    carb                 = Column(Float,    nullable=False)
-    fat                  = Column(Float,    nullable=False)
+    food_id                   = Column(BIGINT,    nullable=False)
+
+    # description          = Column(String,   nullable=False)
+    # energy               = Column(Float,    nullable=False)
+    # protein              = Column(Float,    nullable=False)
+    # carb                 = Column(Float,    nullable=False)
+    # fat                  = Column(Float,    nullable=False)
     score                = Column(Float,    nullable=False)
 
     photo_id            = Column(String,   nullable=False)
@@ -118,7 +120,9 @@ class Dishes (LocalBase):
     timestamp           = Column(DateTime(timezone=True), nullable=False)
     ml_version          = Column(Float,    nullable=False)
 
-    grams               = Column(Float,    nullable=True)
+    area                = Column(Integer,  nullable=False)
+
+    added               = Column(Boolean, nullable   =True)
 
 # Cell
 class User_properties (LocalBase):
