@@ -45,8 +45,8 @@ def apply_custom_colormap(image_gray, cmap):
 
 # Cell
 def get_heatmap(arr,
-                colors = ["white","lime","green","yellow","orange", "red","purple"],
-                values = [0,1,50,100,200,300,400]):
+                colors = ["white","lime","green","yellow","orange", "red","purple","purple","purple","purple","purple","purple"],
+                values = [0,           1,     50,     100,     200,   300,     400,     500,     600,     700,     800,     900]):
 
     l = list(zip([v/max(values) for v in values],colors))
     cmap=LinearSegmentedColormap.from_list('hmap',l)
@@ -60,7 +60,7 @@ def blend_array2img(img,arr,alphas = [0.5,0.5]):
 # Cell
 bad_cats  = ['Vegetables on a sandwich','Candy containing chocolate','Baby juice']
 bad_descs = ['Banana, fried']
-bad_keys = ['baby food']
+bad_keys = ['baby food','frozen']
 bad_keys_cat = ['formula']
 
 
@@ -98,7 +98,7 @@ def search(url):
         area = segmentor_mask[segmentor_mask==c].shape[0]
         if area> 20*20:
             class_mask = np.where(segmentor_mask==c,1,0)
-            class_mask = expand_boundaries(class_mask,times=5,factor=10)
+            class_mask = expand_boundaries(class_mask,times=2,factor=10)
             img_arr = apply_mask(img,class_mask.T).astype(np.uint8)
             img_arr = crop_zeros(img_arr)
             img_arr[img_arr==[0,0,0]]=255 #replace black with while
