@@ -11,10 +11,10 @@
 
 # sudo apt update && apt upgrade
 # sudo apt install wget
-# wget https://repo.anaconda.com/archive/Anaconda3-2020.11-Linux-x86_64.sh
-# chmod +x Anaconda3-2020.11-Linux-x86_64.sh
-# ./Anaconda3-2020.11-Linux-x86_64.sh
-# rm Anaconda3-2020.11-Linux-x86_64.sh
+# wget https://repo.anaconda.com/archive/Anaconda3-2022.05-Linux-x86_64.sh
+# chmod +x Anaconda3-2022.05-Linux-x86_64.sh
+# ./Anaconda3-2022.05-Linux-x86_64.sh
+# rm Anaconda3-2022.05-Linux-x86_64.sh
 
 # export PATH="$HOME/anaconda3/bin:$PATH"
 # alias python="$HOME/anaconda3/bin/python"
