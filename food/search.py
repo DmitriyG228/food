@@ -60,7 +60,7 @@ def blend_array2img(img,arr,alphas = [0.5,0.5]):
 # Cell
 bad_cats  = ['Vegetables on a sandwich','Candy containing chocolate','Baby juice']
 bad_descs = ['Banana, fried']
-bad_keys = ['baby food','frozen']
+bad_keys = ['baby food','frozen','juice','drink']
 bad_keys_cat = ['formula']
 
 
@@ -79,7 +79,7 @@ foods = foods[~foods['category']   .str.lower().str.contains('|'.join(bad_keys_c
 food_clips = series2tensor(foods['clip'])
 
 # Cell
-def search(url):
+def search(url,prompt_factor=0.5,min_score=0.22,exand_times =2):
     img = get_image_from_url(url)
     img,adj = crop_image_to_square(img,True)
     x_adj,y_adj,size = adj
@@ -98,7 +98,7 @@ def search(url):
         area = segmentor_mask[segmentor_mask==c].shape[0]
         if area> 20*20:
             class_mask = np.where(segmentor_mask==c,1,0)
-            class_mask = expand_boundaries(class_mask,times=2,factor=10)
+            class_mask = expand_boundaries(class_mask,times=exand_times,factor=10)
             img_arr = apply_mask(img,class_mask.T).astype(np.uint8)
             img_arr = crop_zeros(img_arr)
             img_arr[img_arr==[0,0,0]]=255 #replace black with while
@@ -110,23 +110,29 @@ def search(url):
 
     stego_img,stego_mask = get_food_segment(img)
 
-    #new
     s = np.copy(segmentor_mask)
     s[s!=0] = 1
     inverse_stego_mask = stego_mask - s
     inverse_stego_mask[inverse_stego_mask==-1]=0
-    stego_img = Image.fromarray(apply_mask(img,inverse_stego_mask).astype(np.uint8))
+    inverse_stego_img = Image.fromarray(apply_mask(img,inverse_stego_mask).astype(np.uint8))
     ##new
-    stego_img.save(fragment_reference_images_path/f'{photo_id}_stego.jpg')
-    urls.append(f'https://dima.grankin.eu/fragment_reference_images/{photo_id}_stego.jpg')
+    stego_img        .save(fragment_reference_images_path/f'{photo_id}_stego.jpg')
+    inverse_stego_img.save(fragment_reference_images_path/f'{photo_id}_inverse_stego.jpg')
+    urls.append(f'https://dima.grankin.eu/fragment_reference_images/{photo_id}_inverse_stego.jpg')
+
+    #to push segmented clips towards the whole dish clip
+    main_image_clip = get_image_clip(f'https://dima.grankin.eu/fragment_reference_images/{photo_id}_stego.jpg')
 
     clip_df = pd.DataFrame()
     for u in urls:
-        clip_df = clip_df.append(search_clip(u,foods,food_clips,head = 1)[1])
+        df = search_clip(u,foods,food_clips,prompt_clip=main_image_clip,head = 10,prompt_factor=prompt_factor)[1]
+        # df['url'] = u
+        clip_df = clip_df.append(df)
     clip_df=clip_df.reset_index(drop=True)
     clip_df['classes'] = classes+[1]
+    #new
 
-    clip_df=clip_df[clip_df['score']>0.22]
+    clip_df=clip_df[clip_df['score']>min_score]
 
     mask = inverse_stego_mask+segmentor_mask
 
