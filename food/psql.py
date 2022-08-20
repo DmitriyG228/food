@@ -137,15 +137,10 @@ class User_properties (LocalBase):
 class FoodsP (LocalBase):
     __tablename__ = 'foods_prompted' #inferenced text of altered food classes
     id                  = Column(BIGINT, primary_key=True)
-    description         = Column(String,          nullable=False)
-    category            = Column(String,          nullable=False)
-    energy              = Column(Float,           nullable=False)
-    protein             = Column(Float,           nullable=False)
-    carb                = Column(Float,           nullable=False)
-    fat                 = Column(Float,           nullable=False)
-    text                = Column(String,          nullable=False)
-
-    clip                = Column(ARRAY(REAL),          nullable=True)
+    food_id             = Column(BIGINT, nullable=False)
+    text                = Column(String, nullable=False)
+    version             = Column(INT,    nullable=False)
+    clip                = Column(ARRAY(REAL),     nullable=True)
 
 # Cell
 class FoodsPI (LocalBase):
