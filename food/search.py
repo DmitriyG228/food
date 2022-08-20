@@ -84,7 +84,7 @@ foods = foods[~foods['category']   .str.lower().str.contains('|'.join(bad_keys_c
 
 food_clips = series2tensor(foods['clip'])
 
-# %% ../00_nbs/01_search.ipynb 7
+# %% ../00_nbs/01_search.ipynb 8
 def search(url,segment_model,stego = False, prompt_factor=0.5,min_score=0.22,exand_times =2):
     img = get_image_from_url(url)
     img,adj = crop_image_to_square(img,True)
@@ -110,11 +110,11 @@ def search(url,segment_model,stego = False, prompt_factor=0.5,min_score=0.22,exa
             img_arr[img_arr==[0,0,0]]=255 #replace black with while
             fname = f'{photo_id}_{c}.jpg'
             Image.fromarray(img_arr).save(fragment_reference_images_path/fname)
-            urls.append(f'https://dima.grankin.eu/fragment_reference_images/{fname}')
+            urls.append(f'{domain}/fragment_reference_images/{fname}')
             classes_.append(c)
     classes = classes_
-    
-    
+
+
     if stego:
 
         stego_img,stego_mask = get_food_segment(img)
@@ -127,11 +127,11 @@ def search(url,segment_model,stego = False, prompt_factor=0.5,min_score=0.22,exa
         ##new
         stego_img        .save(fragment_reference_images_path/f'{photo_id}_stego.jpg')
         inverse_stego_img.save(fragment_reference_images_path/f'{photo_id}_inverse_stego.jpg')
-        urls.append(f'https://dima.grankin.eu/fragment_reference_images/{photo_id}_inverse_stego.jpg')
+        urls.append(f'{domain}/fragment_reference_images/{photo_id}_inverse_stego.jpg')
 
     #to push segmented clips towards the whole dish clip
-    
-    main_image_url = f'https://dima.grankin.eu/fragment_reference_images/{photo_id}_stego.jpg' if stego else url
+
+    main_image_url = f'{domain}/fragment_reference_images/{photo_id}_stego.jpg' if stego else url
     main_image_clip = get_image_clip(main_image_url)
 
     clip_df = pd.DataFrame()
