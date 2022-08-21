@@ -4,24 +4,24 @@
 __all__ = ['branch', 'bot_token', 'domain', 'local_data_path', 'docker_v_path', 'psql_backup_path', 'checkpoints_path',
            'reference_images_path', 'fragment_reference_images_path', 'test_path']
 
-# %% ../00_nbs/00_paths.ipynb 1
+# %% ../00_nbs/00_paths.ipynb 2
 from pathlib import Path
 import os
 
-# %% ../00_nbs/00_paths.ipynb 2
+# %% ../00_nbs/00_paths.ipynb 3
 branch = 'dev'
 bot_token = '5203882708:AAG3G_Y2oZSr-rMG2zoffDVtj3d0KkOFSts'   if branch == 'prod' else "5091011572:AAG4NfkC_zZjcsaAFkwLm4ZXOvhEqyLpQhY"
 
 domain = 'https://dima.skynet.center'
 
 
-# %% ../00_nbs/00_paths.ipynb 3
+# %% ../00_nbs/00_paths.ipynb 4
 from mytools.paths import *
 from mytools.tools import *
 
 from segmentor.paths import checkpoints_path
 
-# %% ../00_nbs/00_paths.ipynb 4
+# %% ../00_nbs/00_paths.ipynb 5
 local_data_path = data_path/'food_dev'
 docker_v_path = local_data_path/'docker_psql'
 psql_backup_path = local_data_path/'psql_backup'

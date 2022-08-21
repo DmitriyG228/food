@@ -85,11 +85,14 @@ foods = foods[~foods['category']   .str.lower().str.contains('|'.join(bad_keys_c
 food_clips = series2tensor(foods['clip'])
 
 # %% ../00_nbs/01_search.ipynb 8
-def search(url,segment_model,stego = False, prompt_factor=0.5,min_score=0.22,exand_times =2):
-    img = get_image_from_url(url)
+def search(segment_model,url=None,path=None,stego = False, prompt_factor=0.5,min_score=0.22,exand_times =2):
+    img = get_image(url=url,path=path)
     img,adj = crop_image_to_square(img,True)
     x_adj,y_adj,size = adj
-    photo_id = url.split('/')[-1]
+    
+    photo_id = url if url else path.name
+    photo_id = photo_id.split('/')[-1]
+    
     i = np.asarray(img, dtype="uint8")
     i = np.flip(i,2)
     segmentor_mask = inference_segmentor(segment_model, i)[0]
