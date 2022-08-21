@@ -85,6 +85,7 @@ foods = foods[~foods['category']   .str.lower().str.contains('|'.join(bad_keys_c
 food_clips = series2tensor(foods['clip'])
 
 # %% ../00_nbs/01_search.ipynb 8
+### depr
 def search(segment_model,url=None,path=None,stego = False, prompt_factor=0.5,min_score=0.22,exand_times =2):
     img = get_image(url=url,path=path)
     img,adj = crop_image_to_square(img,True)
@@ -184,3 +185,93 @@ def search(segment_model,url=None,path=None,stego = False, prompt_factor=0.5,min
     blended_img = blend_array2img(img,get_heatmap(masks[0]),alphas=[0.5, 0.9])
     img = Image.fromarray(blended_img[-y_adj:size+y_adj,-x_adj:size+x_adj,:])
     return img,clip_df,masks,urls,stats
+
+# %% ../00_nbs/01_search.ipynb 11
+def search(segment_model,path=None, prompt_factor=0.5,min_score=0.22,exand_times =2):
+    img = get_image(path=path)
+    img,adj = crop_image_to_square(img,True)
+    x_adj,y_adj,size = adj
+
+    photo_id = path.name.split('/')[-1]
+
+    i = np.asarray(img, dtype="uint8")
+    i = np.flip(i,2)
+    segmentor_mask = inference_segmentor(segment_model, i)[0]
+    segmentor_mask[segmentor_mask!=0]=segmentor_mask[segmentor_mask!=0]+1 
+    classes = np.unique(segmentor_mask)[1:]
+    classes_ =[]
+
+    paths = []
+    for c in classes:
+        area = segmentor_mask[segmentor_mask==c].shape[0]
+        if area> 20*20:
+            class_mask = np.where(segmentor_mask==c,1,0)
+            class_mask = expand_boundaries(class_mask,times=exand_times,factor=10)
+            img_arr = apply_mask(img,class_mask.T).astype(np.uint8)
+            img_arr = crop_zeros(img_arr)
+            img_arr[img_arr==[0,0,0]]=255 #replace black with while
+            fname = f'{photo_id}_{c}.jpg'
+            p = fragment_reference_images_path/fname
+            paths.append(p)
+            Image.fromarray(img_arr).save(p)
+            classes_.append(c)
+    classes = classes_
+    
+    if prompt_factor >0: paths = [path]+paths
+
+    clips =torch.Tensor(get_image_clip_from_paths(paths))
+
+    if prompt_factor>0:
+        prompt_clip = clips[0]
+        clips = clips[1:]
+        diff = prompt_clip - clips
+        clips = clips + diff*prompt_factor
+
+    dfs = []
+
+    for clip in clips:
+        df = foods.copy()
+        df['score'] = cos(food_clips,clip)
+        dfs.append(df.sort_values('score',ascending=False)[:1])
+
+    clip_df = pd.concat(dfs)
+    clip_df['classes'] = classes
+
+    clip_df=clip_df[clip_df['score']>min_score]
+
+    mask = torch.Tensor(segmentor_mask)
+
+    dicts =[]
+    masks =[]
+
+    attributes = ['energy','protein','carb','fat']
+    #create masks of attributes
+    for col in attributes:
+        dicts.append(clip_df[['classes',col]].set_index("classes")[col].to_dict())
+        masks.append(torch.clone(mask))
+
+    areas = {}
+    for c in np.unique(mask):
+        areas[c]= mask[mask==c].shape[0]
+
+        #clean values where classes are filtered out
+        if c not in dicts[0].keys():
+            for m in masks:
+                m[m==c]=0
+
+    #areas          
+    clip_df = clip_df.merge(pd.DataFrame(areas,index = ['area']).T,left_on = 'classes',right_index = True)
+    clip_df = clip_df.sort_values('area',ascending = False)
+
+    #assign values to the masks
+    for d,m in zip(dicts,masks):
+        for k,v in d.items(): m[m == k] = v
+
+    stats = pd.DataFrame([float(m[m!=0].mean()) for m in masks]+[masks[0][masks[0]!=0].shape[0]],
+                     index = attributes+['size'])
+
+
+    img = ImageOps.grayscale(img).convert('RGB')
+    blended_img = blend_array2img(img,get_heatmap(masks[0]),alphas=[0.5, 0.9])
+    img = Image.fromarray(blended_img[-y_adj:size+y_adj,-x_adj:size+x_adj,:])
+    return img,clip_df,masks,stats
