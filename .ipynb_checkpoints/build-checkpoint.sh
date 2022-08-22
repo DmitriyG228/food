@@ -94,31 +94,3 @@ sudo docker run --name psql_food_prod -e POSTGRES_PASSWORD=KJnbuiwuef89k -d -p 5
 # zstd -T0 -d dump_21-01-2021_15_51_08.sql.zst dump_21-01-2021_15_51_08.sql & 
 ## load backup
 # cat dump_21-01-2021_15_51_08.sql | docker exec -i postgis psql -U postgres | ts '[%Y-%m-%d %H:%M:%S]' >> log.log & 
-
-
-
-### nginx
-
-# sudo nano /etc/nginx/sites-available/default
-
-# server {
-#     include grankin.ssl;
-#     server_name         dima.grankin.eu;
-#     location / {
-#         proxy_pass         http://0.0.0.0:8867;
-#         include proxy.conf;
-#     }
-#     location /reference_images/ {
-#         root /home/dima/new/data/food_dev/;
-#     }
-#     location /fragment_reference_images/ {
-#         root /home/dima/new/data/food_dev/;
-#     }
-
-#     location /test_photos/ {
-#         root /home/dima/data/test_set/;
-#     }
-# }
-
-# sudo nginx -t
-# sudo service nginx restart

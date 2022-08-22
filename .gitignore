@@ -1,5 +1,12 @@
 __pycache__/
 food/__pycache__/
 qdrant_storage/
+qdrant_prod_storage/
+.vscode/
+food_dataset/
 image_url
-condaenv.xr8bzr_e.requirements.txt
+qdrant_storage_dev/
+saved_models/*
+00_nbs/.ipynb_checkpoints/
+food/.ipynb_checkpoints/
+
