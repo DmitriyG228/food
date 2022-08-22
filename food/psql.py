@@ -2,8 +2,7 @@
 
 # %% auto 0
 __all__ = ['passw', 'docker_name', 'port', 'engine', 'Session', 'session', 'Base', 'schema', 'LocalBase', 'docker_run', 'pgdump',
-           'pgrestore', 'Foods', 'CFoods', 'FFoods', 'Users', 'Dishes', 'User_properties', 'FoodsP', 'FoodsPI',
-           'Indexed']
+           'pgrestore', 'Foods', 'Users', 'Dishes', 'User_properties', 'FoodsP']
 
 # %% ../00_nbs/00_psql.ipynb 2
 from sqlalchemy import create_engine
@@ -53,9 +52,9 @@ from .paths import *
 
 # %% ../00_nbs/00_psql.ipynb 3
 passw = 'postgres'
-docker_name = 'psql_food_dev'
+docker_name = 'psql_food_prod'
 
-port = 5434 if branch == 'prod' else 5436
+port = 5435 if branch == 'prod' else 5436
 
 
 
@@ -71,7 +70,7 @@ LocalBase = declarative_base(metadata=MetaData(schema=schema))
 
 # %% ../00_nbs/00_psql.ipynb 5
 def docker_run(docker_name,passw,port): 
-    return f'sudo docker run --name {docker_name} -e POSTGRES_PASSWORD={passw} -d -p {port}:5432  -v {docker_v_path} postgres'
+    return f'sudo docker run --name {docker_name} -e POSTGRES_PASSWORD={passw} -d -p {port}:5432  -v {docker_v_path} --restart unless-stopped postgres'
 
 
 def pgdump(schema,passw,port):    
@@ -99,20 +98,6 @@ class Foods (LocalBase):
     clip                = Column(ARRAY(REAL),          nullable=True)
 
 # %% ../00_nbs/00_psql.ipynb 12
-class CFoods (LocalBase):
-    __tablename__ = 'foods_clusters' 
-    id                  = Column(BIGINT,  primary_key=True)
-    cluster             = Column(Integer, nullable=True)
-
-# %% ../00_nbs/00_psql.ipynb 13
-class FFoods (LocalBase):
-    __tablename__ = 'foundation_foods' 
-    id                  = Column(BIGINT, primary_key=True)
-    description         = Column(String,          nullable=False)
-    
-    clip                = Column(ARRAY(REAL),          nullable=True)
-
-# %% ../00_nbs/00_psql.ipynb 14
 class Users (LocalBase):
     __tablename__ = 'users' 
     id                  = Column(BIGINT,     primary_key=True)
@@ -122,7 +107,7 @@ class Users (LocalBase):
     language_code       = Column(String,     nullable=True)
     
 
-# %% ../00_nbs/00_psql.ipynb 16
+# %% ../00_nbs/00_psql.ipynb 14
 class Dishes (LocalBase):
     __tablename__ = 'dishes'
     id                   = Column(BIGINT,  primary_key=True, autoincrement = True)
@@ -147,7 +132,7 @@ class Dishes (LocalBase):
     
     added               = Column(Boolean, nullable   =True)
 
-# %% ../00_nbs/00_psql.ipynb 17
+# %% ../00_nbs/00_psql.ipynb 15
 class User_properties (LocalBase):
     __tablename__ = 'user_properties'
     id                  = Column(BIGINT,  primary_key=True, autoincrement = True)
@@ -156,7 +141,7 @@ class User_properties (LocalBase):
     value               = Column(String,   nullable=False)
     timestamp           = Column(DateTime(timezone=True), nullable=False)
 
-# %% ../00_nbs/00_psql.ipynb 18
+# %% ../00_nbs/00_psql.ipynb 17
 class FoodsP (LocalBase):
     __tablename__ = 'foods_prompted' #inferenced text of altered food classes
     id                  = Column(BIGINT, primary_key=True)
@@ -164,22 +149,3 @@ class FoodsP (LocalBase):
     text                = Column(String, nullable=False)
     version             = Column(INT,    nullable=False)
     clip                = Column(ARRAY(REAL),     nullable=True)
-
-# %% ../00_nbs/00_psql.ipynb 21
-class FoodsPI (LocalBase):
-    __tablename__ = 'foods_prompted_images'
-    id                  = Column(BIGINT, primary_key=True,autoincrement = True)
-    food_id             = Column(BIGINT,   nullable=False)
-    country_code        = Column(String,          nullable=True)
-    store_name          = Column(String,          nullable=True)
-    product_name        = Column(String,          nullable=True)
-    path                = Column(String,          nullable=True)
-    accuracy            = Column(Float,          nullable=True)
-
-    clip                = Column(ARRAY(REAL),          nullable=False)
-
-# %% ../00_nbs/00_psql.ipynb 23
-class Indexed (LocalBase):
-    __tablename__ = 'indexed'
-    id                   = Column(BIGINT,  primary_key=True)
-    indexed              = Column(Boolean, nullable   =False)
