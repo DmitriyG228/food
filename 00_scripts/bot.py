@@ -1,8 +1,7 @@
-from tendo import singleton
-me = singleton.SingleInstance()
-
+import sys
+sys.path.insert(0,'..')
 from food.psql import *
-from food.tools import get_logger
+from mytools.tools import get_logger
 logger = get_logger(engine,'bot_logs','food')
 logger.debug({'msg':'starting bot'})
 from aiogram import Bot, Dispatcher, executor, types
@@ -16,6 +15,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.utils.callback_data import CallbackData
 import typing
 import numpy as np
+import io
 
 
 from food.paths import *
@@ -24,7 +24,6 @@ from food.paths import *
 API_TOKEN = bot_token
 
 from food.paths import *
-from food.search import *
 import pandas as  pd
 import pytz
 timezones = pytz.all_timezones
@@ -33,377 +32,233 @@ from requests.structures import CaseInsensitiveDict
 import urllib
 from tzwhere import tzwhere
 
-import nest_asyncio
-nest_asyncio.apply()
 
-def geocode(q):
-    geocoding_key = '5d96ac126bcb462cb373297924ab2cb4'
-    url = "https://api.geoapify.com/v1/geocode/search?"
+from segmentor.segment import get_segment_model
+from food.search import *
+from mytools.psql import *
 
-    params = {"apiKey":geocoding_key, 
-              "text":q}
-
-    resp = requests.get(url + urllib.parse.urlencode(params)).json()
-    return  pd.json_normalize(resp['features']).sort_values('properties.rank.importance',ascending = False)[['properties.lat','properties.lon']].iloc[0].to_list()
-   
-def get_tz(q):
-    lat,lon = geocode(q)
-    return tzwhere.tzwhere().tzNameAt(lat,lon)
-async def async_get_tz(q):
-    return get_tz(q)
-async def async_search_image(url, env='prod'):
-    return search_image(url,env)
-async def async_geocode(q):
-    return geocode(q)
 async def  async_insert_on_conflict(*args, **qwargs):
     return insert_on_conflict(*args, **qwargs)
 async def add_sender(message):
+    logger.debug({'func':'add_sender','id_key':'user_id','id_value':message['from']['id'],'msg':'add_sender'})
     sender = message['from'].to_python()
     sender = pd.DataFrame(sender,index=[0]).drop(columns =['is_bot'])
-    await async_insert_on_conflict(sender,'users',unique_cols=['id'])
-def get_msg(query):
-    dish = pd.read_sql(f"""select energy,protein,carb,fat from food.dishes 
-                                where user_id={query['from']['id']} and 
-                                message_id = {query['message']['message_id']}
-                                order by id desc limit 1""",engine)
-    plot_numtients = dish[['energy','protein','carb','fat']].reset_index(drop=True)
-    plot_numtients.index = ['']
-    return plot_numtients.astype(int).to_string()
-def get_today_consumed(user_id):
-    today_consumed = pd.read_sql(f"""select energy,grams,timestamp from {schema}.dishes
-                                    where user_id = {user_id} and timestamp > now() - interval '24 hours'
-                                    and grams is not null;""",engine).set_index("timestamp")
-    today_consumed= today_consumed['energy']/100*today_consumed['grams']
-    user_tz = engine.execute(f"""select value from food.user_properties 
-                                where user_id={user_id} and
-                                property='tz'
-                                order by id desc limit 1""").first()
+    await async_insert_on_conflict(sender,'users',unique_cols=['id'],engine = engine)
+def plot_nutrition(masks):
+    attributes = ['energy','protein','carb','fat']
+    nutrition ={}
+    for m,a in zip(masks,attributes): nutrition[a] = float(m[m!=0].mean())
+    return pd.DataFrame(nutrition,index = ['']).fillna(0).astype(int).to_string()
+def image2file_obj(img):
+    o = io.BytesIO()
+    f = img.format if img.format else 'jpeg'
+    img.save(o, format=f)
+    return o.getvalue()
+async def async_image2file_obj(*args,**kwargs):
+    return image2file_obj(*args,**kwargs)
 
-    user_tz = user_tz[0] if user_tz else 'UTC'
-    today_consumed = today_consumed.tz_convert(user_tz)
-    now = pd.Timestamp.now(tz = user_tz)
-    today_consumed = today_consumed.reset_index()	
-    this_morning = pd.Timestamp(year = now.year,month = now.month,day = now.day,hour = 3,tz = user_tz)
-    today_consumed = today_consumed[today_consumed['timestamp'] > pd.Timestamp(this_morning)][0].sum()
-    return int(today_consumed),user_tz
+async def async_search(*args,**kwargs):
+    return search(*args,**kwargs)
+
+async def async_visualize_array(*args,**kwargs):
+    return visualize_array(*args,**kwargs)
 
 
-import asyncio
+
+model_path = checkpoints_path.ls()[0]
+segment_model = get_segment_model(model_path)
 
 
 bot = Bot(token=API_TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
-
 dishes_table = Dishes.__table__
 
-add_dish_cb   = CallbackData('add dish', 'action')
-measurment_cb = CallbackData('measurment', 'weight')
-edit_dish_cb  = CallbackData('edit_dish', 'action')
-choose_metr_cb  = CallbackData('choose_metr', 'choice')
 
-ml_version = 0.3
+add_dish_cb     = CallbackData('add to food log', 'action')
+remove_cb       = CallbackData('remove from food log', 'action')
 
 
-set_timezone_command = types.BotCommand('set_timezone','set you timezone so that we know when your day starts')
-commands = [set_timezone_command]
-asyncio.run(bot.set_my_commands(commands))
+def attribute_score(cals,values,scores):
+    arrays = []
+    for n in range(len(values)-1):
+        arrays.append(np.stack([np.linspace(values[n],values[n+1]),np.flip(np.linspace(scores[n+1],scores[n]))]))
+        formula = np.concatenate(arrays,axis=1)
+        c = formula[0][formula[0] <cals][-1]
 
-grams_grid  = list(np.arange(10,1000,10)[:56])
-grams_grid = [str(int(v)) for v in grams_grid]
-ounces_grid = list(np.arange(0.4,23,0.4)[:56])
-ounces_grid = [str(round(v,1)) for v in ounces_grid]
-grid_values = list(set(grams_grid+ounces_grid))
+    return formula[1][formula[0]==c].astype(np.int32)[0]
+def get_food_score(cals,protein):
+    return attribute_score(cals   ,calore_scores[0],calore_scores[1]),attribute_score(protein,protein_scores[0],protein_scores[1])
+protein_scores = ([0,10,20,35],
+                  [30,90,100,100])
+calore_scores  = ([0,  90, 100,150,200,300,400],
+                  [100,100, 95,70 ,60 ,50 ,30])
+text = ':thumbs_down:'
+#emoji.emojize(text)
 def get_keyboard(t, unit = None):
     markup = types.InlineKeyboardMarkup()
-    if t == 'add dish' :  
-        markup.add(types.InlineKeyboardButton('add dish', callback_data=add_dish_cb.new(action='add_dish')))
+    if t == 'add to food log' :  
+        # btns_text = ['add to food log',':thumbs_up:',':thumbs_down:']
+        markup.add(types.InlineKeyboardButton('add to food log', callback_data=add_dish_cb.new(action='add_dish')))
+        # markup.add(*(types.InlineKeyboardButton('add to food log', callback_data=remove_cb.new(action=text)) for text in btns_text))
          
-    elif t == 'measurment':
 
-        btns_text = tuple(ounces_grid) if unit == 'ounces' else grams_grid
+    elif t == 'remove from food log':
 
-
-        markup = types.InlineKeyboardMarkup(row_width=8)
+        btns_text = ('remove from food log',)
+        markup.add(types.InlineKeyboardButton('remove from food log', callback_data=remove_cb.new(action='remove')))
         
-        markup.add(*(types.InlineKeyboardButton(text, callback_data=measurment_cb.new(weight=text)) for text in btns_text))
-
-    elif t == 'edit_dish':
-
-        btns_text = ('remove','edit weight','add again')
-        markup.add(*(types.InlineKeyboardButton(text, callback_data=edit_dish_cb.new(action=text)) for text in btns_text))
-
-
-    elif t == 'choose_metr':
-
-        btns_text = ('grams','ounces')
-        markup.add(*(types.InlineKeyboardButton(text, callback_data=choose_metr_cb.new(choice=text)) for text in btns_text))
-
-
-    
+        
+        # markup.add(*(types.InlineKeyboardButton(text, callback_data=remove_cb.new(action=text)) for text in btns_text))
 
     return markup 
+@dp.message_handler(commands=['start'])
+async def start_command(message: types.Message):
+    global m 
+    m = message
+    logger.debug({'func':'start_command','id_key':'user_id','id_value':message['from']['id'],'msg':'start_command'})
+    await add_sender(message)
 
-async def measurment(unit, query: types.CallbackQuery, callback_data: typing.Dict[str, str]):
-    logger.debug({'func':'measurment','id_key':'user_id','id_value':query['from']['id'],'msg':'measurment'})
+    await message.reply(""" Take <b>food pictures</b> to improve your diet.\n 
+
+No  more calorie counting, food weight measurement, manual food logging. <b>A single picture per dish is the only thing you need to do</b> .\n
+Your photos are returned back to you colorised as a heat map. Just choose more of coloured in green  next time and less of colorer in  red.\n
+Get your <b>nutrition score</b> updated with every meal, try to keep it high.\n
+<b>Calorie density</b> is a scientific approach that allows to <b>eat till satisfaction while still cutting back on calories</b>. That idea is implemented <b>with the power of AI</b> to be as easy to follow as taking pictures.\n
 
 
-    await query.answer()
+<b>how it gain great results:</b>\n
+- eat only till sutisfaction and do not overeat.
+- try not to drink your calories.
+- take photos of all the foods <b>from the same distance</b> and with the same focus distance each time\n
+- <b>use flash</b>\n
 
-    msg = query.to_python()['message']['text']
-    msg = msg.split('\xa0')[0] if '\xa0' in msg else msg
-    msg = f"{msg}\n \xa0 please choose weight of the dish in {unit}"
-
-    await bot.edit_message_text(
-        msg,
-        query.from_user.id,
-        query.message.message_id,
-        reply_markup=get_keyboard('measurment',unit),
-    )
-def get_update(query,weight):
-    energy = engine.execute(f"""select energy from food.dishes 
-                                    where user_id={query['from']['id']}
-                                    and message_id = {query['message']['message_id']}
-                                    order by id desc limit 1""").first()[0]
-    stmt = (
-                dishes_table.update()
-                            .where(dishes_table.c.message_id == query['message']['message_id'])
-                            .values(grams=weight)
-                            .returning(dishes_table.c.id)
-        )
-    session.execute(stmt)
-    session.commit()
-
-    return int(energy)
-
-#photo recieved
+Now <b>take a picture of your next dish</b> with the bot!""",parse_mode = 'HTML')
+# Take <b>pictures of your food</b> to know how healthy it is with the power of <b>AI</b>.\n\
+    
+#     Get your <b>nutrition score</b> updated every time you take a meal.\n \
+#     Keep high food score to stay fit and healthy.\n<b>Take a picture of your next dish with the bot!</b>
 @dp.message_handler(content_types=ContentType.PHOTO,state='*')
 async def process_photo(message: types.Message, state: FSMContext):
     logger.debug({'func':'process_photo','id_key':'user_id','id_value':message['from']['id'],'msg':'process_photo started'})
     
-
-    await state.finish()
-
+    processing_reply = await message.reply("""\xa0 your picture is being processed ...""",
+                           parse_mode = 'HTML')
     
-    await types.ChatActions.typing()
-
-    await add_sender(message)
-
+    await types.ChatActions.upload_photo()
     photo  = message['photo'][-1]
-    await photo.download(reference_images_path/photo['file_id'])
-    image_url = await photo.get_url()
-    dish = await async_search_image(url=image_url, env='prod')
-    description = dish['description'].iloc[0]
+    path = reference_images_path/photo['file_id']
+    await photo.download(path)
+    
+    # image_url    = await photo.get_url()
+    image_url      = f'https://dima.grankin.eu/reference_images/{photo["file_id"]}'
+    
+    img,clip_df,masks,stats = await async_search(segment_model,path,prompt_factor=0.1,min_score=0.22,exand_times =2)
+    
+    print('after search')
 
-
+    dish = clip_df.reset_index()[['id','score','area']]
     dish['photo_id']         = photo['file_id']
     dish['photo_message_id'] = message['message_id']
     sender = message['from'].to_python()
     dish['user_id'] = sender['id']
-    dish['ml_version'] = ml_version 
+    dish['ml_version'] = 0.4 
     dish['timestamp']=pd.Timestamp.utcnow()
-
+    dish = dish.rename(columns = {"id":'food_id'})
     
-    plot_numtients = dish[['energy','protein','carb','fat']].reset_index(drop=True)
-    plot_numtients.index = ['']
+    output = '; '.join(clip_df['description'].tolist())
 
-    msg = f'{description}, per 100 gram \n {plot_numtients.astype(int).to_string()}'
+    print('downloaded')
+
+    img_o = await async_image2file_obj(img)
     
-    # msg = description + '\n'+ plot_numtients.astype(int).to_string()
-
-    reply_message = await message.reply(msg, reply_markup=get_keyboard('add dish'))
-    dish['message_id'] = reply_message['message_id']
+    await processing_reply.delete()
+    reply = await message.reply_photo(img_o,caption=f'<i>per 100 gram</i>:\n{plot_nutrition(masks)} \n\n{output}', reply_markup=get_keyboard('add to food log'),parse_mode = 'HTML')
+    dish['message_id'] = reply['message_id']
     
-    dish.to_sql('dishes',schema = schema,if_exists = 'append',index = False,con=engine)
-
+    dish.to_sql('dishes',con=engine,if_exists='append',index = False,schema = 'food')
+    
     logger.debug({'func':'process_photo','id_key':'user_id','id_value':message['from']['id'],'msg':'process_photo finished'})
-
-
-
-   
-class CState(StatesGroup): 
-    set_timezone    = State()
-@dp.message_handler(commands=['set_timezone'])
-async def set_timezone_command(message: types.Message, state: FSMContext):
-    logger.debug({'func':'set_timezone_command','id_key':'user_id','id_value':message['from']['id'],'msg':'set_timezone pushed'})
-    await CState.set_timezone.set()
-    await message.reply(f"please search your town to set timezone")
-@dp.message_handler(state=CState.set_timezone)
-async def set_timezone(message: types.Message, state: FSMContext):
-    logger.debug({'func':'set_timezone','id_key':'user_id','id_value':message['from']['id'],'msg':f'set_timezone to {message.text} started'})
-    await types.ChatActions.typing()
-    await add_sender(message)
-    tz = await async_get_tz(message.text)
-
-    df = pd.DataFrame([[message['from']['id'],'tz',tz,pd.Timestamp.utcnow()]],columns = ['user_id','property','value','timestamp'])
-    df.to_sql('user_properties',schema = schema,con = engine,if_exists = 'append',index = False)
-
-    await state.finish()
-
-    await message.reply(f"your tz is set to {tz}")
-
-    logger.debug({'func':'set_timezone','id_key':'user_id','id_value':message['from']['id'],'msg':f'set_timezone to {message.text} finished'})
-
-def get_metric_unit(user_id):
-    unit = engine.execute(f"""select value from food.user_properties 
-                                where user_id={user_id} and
-                                property='metric_unit'
-                                order by id desc limit 1""").first()
-
-    return unit[0] if unit else None
-
-@dp.message_handler(commands=['start'])
-async def start_command(message: types.Message):
-
-    logger.debug({'func':'start_command','id_key':'user_id','id_value':message['from']['id'],'msg':'start'})
     
-    await message.reply("""Counting calories as easy as taking pictures. Just capture everything before you eat it\n
-                          Now send a photo of your meal to try""")
+    
+async def get_today_consumed(user_id):
+
+    today_consumed = pd.read_sql( f"""select f.energy, f.protein, d.area,d.timestamp
+                           from food.foods f
+                           join food.dishes d on (f.id = d.food_id)
+                           where d.user_id = {user_id} and 
+                                 d.timestamp > now() - interval '24 hours' and
+                                 d.added is true""" ,engine).set_index("timestamp")
+
+    
+    area = today_consumed['area'].sum()
+    if area>0:
+        cals = np.average(today_consumed['energy'] ,weights=today_consumed['area'])
+        prts = np.average(today_consumed['protein'],weights=today_consumed['area'])
+        cals_score, prts_score =  get_food_score(cals,prts)
+        food_score = int((cals_score*2+prts_score)/3)
+
+
+        return int(food_score),int(cals),int(cals_score),int(prts_score),int(prts),area
+    
+    else: return None,None,None,None,None,0
+async def add_remove(query,add):
+    
+    msg = query.to_python()['message']['caption']
+    msg = msg.split('\xa0')[0] if '\xa0' in msg else msg
+    
+    stmt = (
+        dishes_table.update()
+                    .where(dishes_table.c.message_id == query['message']['message_id'])
+                    .values(added=add)
+                    .returning(dishes_table.c.id)
+        )
+    session.execute(stmt)
+    session.commit()
+    
+    user_id = query['from']['id']
+    
+    food_score,cals,cals_score,prts,prts_score,area = await get_today_consumed(user_id)
+    
+    if cals_score < 70:
+        if prts_score <70:
+            m = 'Keep choosing foods in a <b>greener</b> spectrum and have a bit of <b>protein</b> rich foods'
+        else:
+            m = 'Keep choosing foods in a <b>greener</b> spectrum'
+    else:
+        if prts_score <70:
+            m = 'Your calories are good. Try to have more of <b>protein</b> rich foods to improve your nutrition score'
+        else:
+            m = 'you are doing <b>great</b>!'
+
+
+    
+    if add:
+        if area>300000: 
+            msg = f"{msg}\n\n\xa0your <b>nutrition score</b> for the last 24 hours is <b>{food_score}</b>"
+            msg = f"{msg}\n\n\xa0<i>{m}</i>"
+        else:
+            msg = f"{msg}\n\n\xa0keep adding your dishes to get your food score"
+            
+        
+    keyboard = 'remove from food log' if add else 'add to food log' 
+
+    await bot.edit_message_caption(query.from_user.id,
+                                    query.message.message_id,
+                                    caption = msg,
+                                    reply_markup=get_keyboard(keyboard),
+                                    parse_mode = 'HTML')
+    
 #add_dish pushed
 @dp.callback_query_handler(add_dish_cb.filter(action=['add_dish']))
 async def add_dish(query: types.CallbackQuery, callback_data: typing.Dict[str, str]):
     logger.debug({'func':'add_dish','id_key':'user_id','id_value':query['from']['id'],'msg':'add_dish'})
-
-    unit = get_metric_unit(query['from']['id'])
-    if not unit:
-
-        msg = query.to_python()['message']['text']
-        msg = msg.split('\xa0')[0] if '\xa0' in msg else msg
-        msg = f"{msg}\n \xa0 please choose unit for your food weight measurement"
-
-
-        await bot.edit_message_text(
-        msg,
-        query.from_user.id,
-        query.message.message_id,
-        reply_markup=get_keyboard('choose_metr'))
-
-    else:   
-        await measurment(unit,query, callback_data)
-#add_dish pushed and no metric selected
-@dp.callback_query_handler(choose_metr_cb.filter(choice=['grams']))
-async def select_metric_grams(query: types.CallbackQuery, callback_data: typing.Dict[str, str]):
-    logger.debug({'func':'select_metric_grams','id_key':'user_id','id_value':query['from']['id'],'msg':'select_metric_grams'})
     
-    df = pd.DataFrame([[query['from']['id'],'metric_unit','grams',pd.Timestamp.utcnow()]],columns = ['user_id','property','value','timestamp'])
-    df.to_sql('user_properties',schema = schema,con = engine,if_exists = 'append',index = False)
-
-    await measurment('grams',query, callback_data)
-#add_dish pushed and no metric selected
-@dp.callback_query_handler(choose_metr_cb.filter(choice=['ounces']))
-async def callback_vote_action(query: types.CallbackQuery, callback_data: typing.Dict[str, str]):
-    logger.debug({'func':'select_metric_ounces','id_key':'user_id','id_value':query['from']['id'],'msg':'select_metric_ounces'})
-
-    df = pd.DataFrame([[query['from']['id'],'metric_unit','ounces',pd.Timestamp.utcnow()]],columns = ['user_id','property','value','timestamp'])
-    df.to_sql('user_properties',schema = schema,con = engine,if_exists = 'append',index = False)
-
-    await measurment('ounces',query, callback_data)
-#add_dish pushed
-@dp.callback_query_handler(edit_dish_cb.filter(action=['edit weight']))
-async def edit_weight(query: types.CallbackQuery, callback_data: typing.Dict[str, str]):
-    logger.debug({'func':'edit_weight','id_key':'user_id','id_value':query['from']['id'],'msg':'edit_weight'})
-    unit = get_metric_unit(query['from']['id'])
-    await measurment(unit,query, callback_data)
-#measure provided
-@dp.callback_query_handler(measurment_cb.filter(weight=grid_values))
-async def weight_processing(query: types.CallbackQuery, callback_data: typing.Dict[str, str]):
-
-    logger.debug({'func':'weight_processing','id_key':'user_id','id_value':query['from']['id'],'msg':'weight_processing started'})
-
-    await query.answer()
-
-
-    t = 'ounces' if 'ounces' in query.to_python()['message']['text'] else 'grams'
-    u = 28.3495 if t == 'ounces' else 1
-
-    weight = float(callback_data['weight'])
-
-    energy = get_update(query,weight)
-
-    msg = query.to_python()['message']['text']
-    msg = msg.split('\xa0')[0] if '\xa0' in msg else msg #
-
-    msg = f"{msg} \xa0 \n consumed {weight} {t}  \xa0 \n  {int(energy/100*u*weight)} kcall"
-
-    today_consumed,usertz = get_today_consumed(query['from']['id'])
-    msg = f"{msg}  \xa0 \n today consumed {today_consumed}"
-    if usertz=='UTC': 
-        msg = f"{msg}  \xa0 \n  please /set_timezone so bot knows when your day is started"
-        # await bot.send_message(chat_id=query['from']['id'], 
-        #                        text='please /set_timezone so bot knows when your day is started')
-
-    
-
-    await bot.edit_message_text(
-        msg,
-        query.from_user.id,
-        query.message.message_id,
-        reply_markup=get_keyboard('edit_dish')
-    )
-
-    logger.debug({'func':'weight_processing','id_key':'user_id','id_value':query['from']['id'],'msg':'weight_processing finished'})
-    
-#remove pushed
-@dp.callback_query_handler(edit_dish_cb.filter(action=['remove']))
+    await add_remove(query,True)
+#remove_dish pushed
+@dp.callback_query_handler(remove_cb.filter(action=['remove']))
 async def remove_dish(query: types.CallbackQuery, callback_data: typing.Dict[str, str]):
     logger.debug({'func':'remove_dish','id_key':'user_id','id_value':query['from']['id'],'msg':'remove_dish'})
-    _ = get_update(query,0)
-
-
-    msg = query.to_python()['message']['text']
-    msg = msg.split('\xa0')[0] if '\xa0' in msg else msg
-
-    today_consumed,usertz = get_today_consumed(query['from']['id'])
-    msg = f"{msg}  \xa0 \n today consumed {today_consumed}"
-    if usertz=='UTC': 
-        msg = f"{msg}  \xa0 \n  please /set_timezone so bot knows when your day is started"
-        # await bot.send_message(chat_id=query['from']['id'], 
-        #                        text='please /set_timezone so bot knows when your day is started')
-
-
-    await query.answer()
-    await bot.edit_message_text(
-        msg,
-        query.from_user.id,
-        query.message.message_id,
-        reply_markup=get_keyboard('add dish'))
-#add again pushed
-@dp.callback_query_handler(edit_dish_cb.filter(action=['add again']))
-async def add_again(query: types.CallbackQuery, callback_data: typing.Dict[str, str]):
-    logger.debug({'func':'add_again','id_key':'user_id','id_value':query['from']['id'],'msg':'add_again'})
-
-
-    dish = pd.read_sql(f"""select description,energy,protein,carb,fat,score,photo_id,user_id,ml_version,photo_message_id
-                from food.dishes 
-                                                    where user_id={query['from']['id']}
-                                                    and message_id = {query['message']['message_id']} limit 1""",engine)
-    dish['timestamp'] = pd.Timestamp.utcnow()
-
-
-    msg = query.to_python()['message']['text']
-    msg = msg.split('\xa0')[0] if '\xa0' in msg else msg
-
-    today_consumed,usertz = get_today_consumed(query['from']['id'])
-    msg = f"{msg}  \xa0 \n today consumed {today_consumed}"
-    if usertz=='UTC': 
-        msg = f"{msg}  \xa0 \n  please /set_timezone so bot knows when your day is started"
-
-
-        # await bot.send_message(chat_id=query['from']['id'], 
-        #                        text='please /set_timezone so bot knows when your day is started')
-
-
-
-    await query.answer()
-    message = await bot.send_message(chat_id=query['from']['id'], 
-                                     reply_to_message_id = dish['photo_message_id'].iloc[0],
-                                     text=msg, 
-                                     reply_markup=get_keyboard('add dish'))
-
-    dish['message_id'] = message['message_id']
-    dish.to_sql('dishes',schema = schema,if_exists = 'append',index = False,con=engine)
     
-    
-
-if __name__ == '__main__':
-    executor.start_polling(dp)
+    await add_remove(query,False)
+if __name__ == '__main__': executor.start_polling(dp)
