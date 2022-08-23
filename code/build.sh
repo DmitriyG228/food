@@ -122,3 +122,17 @@ sudo docker run --name psql_food_prod -e POSTGRES_PASSWORD=KJnbuiwuef89k -d -p 5
 
 # sudo nginx -t
 # sudo service nginx restart
+
+
+### crontab
+
+# SHELL=/bin/bash                                                                                                               
+# BASH_ENV=~/.bashrc_conda                                                                                                     
+# @reboot   /bin/bash -c cd /home/dima; source ~/.bashrc; conda activate base; (jupyter lab --ip=0.0.0.0 --port=9996) 
+
+# @reboot    conda activate food_product; cd food_prod; git checkout production; python 0_food_app.py &>>$HOME/app1.log         
+# * * * * *  conda activate food_product; cd food_prod; git checkout production; python 0_food_app.py &>>$HOME/app1.log      
+
+
+# @reboot   conda activate clipapi; cd clipapi; python 0_model_app.py &>>$HOME/output/app.log                                   
+# * * * * * conda activate clipapi; cd clipapi; python 0_model_app.py &>>$HOME/output/app.log                                   

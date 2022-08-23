@@ -186,7 +186,7 @@ def search(segment_model,url=None,path=None,stego = False, prompt_factor=0.5,min
     img = Image.fromarray(blended_img[-y_adj:size+y_adj,-x_adj:size+x_adj,:])
     return img,clip_df,masks,urls,stats
 
-# %% ../00_nbs/01_search.ipynb 11
+# %% ../00_nbs/01_search.ipynb 9
 def search(segment_model,path=None, prompt_factor=0.5,min_score=0.22,exand_times =2):
     img = get_image(path=path)
     img,adj = crop_image_to_square(img,True)
