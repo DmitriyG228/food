@@ -9,10 +9,7 @@ qdrant_storage_dev/
 saved_models/*
 00_nbs/.ipynb_checkpoints/
 food/.ipynb_checkpoints/
-00_nbs/.ipynb_checkpoints/
-*/.ipynb_checkpoints/*.ipynb
-<<<<<<< HEAD
-*/.ipynb_checkpoints/*.ipynb
-code/00_nbs/.ipynb_checkpoints/*.ipynb
+*/.ipynb_checkpoints/
 
-
+*/.ipynb_checkpoints/*.ipynb
+**/*-checkpoint*
