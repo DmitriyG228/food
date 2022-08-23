@@ -11,5 +11,8 @@ saved_models/*
 food/.ipynb_checkpoints/
 00_nbs/.ipynb_checkpoints/
 */.ipynb_checkpoints/*.ipynb
-code/.ipynb_checkpoints/*.ipynb
+<<<<<<< HEAD
+*/.ipynb_checkpoints/*.ipynb
+code/00_nbs/.ipynb_checkpoints/*.ipynb
+
 

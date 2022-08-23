@@ -1,5 +1,5 @@
 #conda env update --file environment.yml --prune
-name: f1
+name: food
 channels:
   - pytorch
   - defaults
@@ -38,10 +38,3 @@ dependencies:
     - qdrant_client
     - tzwhere
     - line-profiler
-    - terminaltables
-    - seaborn
-    
-    
-#pip install -U openmim mim install mmcv-full==1.2.6 pip install timm==0.4.12
-#https://github.com/open-mmlab/mmocr/issues/325#issuecomment-867719744
-#https://github.com/qubvel/segmentation_models.pytorch/issues/424#issuecomment-1018189215
