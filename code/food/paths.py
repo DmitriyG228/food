@@ -9,7 +9,7 @@ from pathlib import Path
 import os
 
 # %% ../00_nbs/00_paths.ipynb 2
-branch = 'dev'
+branch = 'prod'
 
 if branch == 'prod':
     bot_token        = '5203882708:AAG3G_Y2oZSr-rMG2zoffDVtj3d0KkOFSts'  

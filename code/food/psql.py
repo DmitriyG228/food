@@ -55,7 +55,7 @@ from .paths import *
 passw = 'postgres'
 docker_name = 'psql_food_dev'
 
-port = 5434 if branch == 'prod' else 5436
+port = 5435 if branch == 'prod' else 5436
 
 
 
