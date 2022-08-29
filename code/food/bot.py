@@ -57,7 +57,7 @@ async def  async_insert_on_conflict(*args, **qwargs):
 async def add_sender(message):
     logger.debug({'func':'add_sender','id_key':'user_id','id_value':message['from']['id'],'msg':'add_sender'})
     sender = message['from'].to_python()
-    sender = pd.DataFrame(sender,index=[0])[['first_name','last_name','username','language_code']] ##to cut premium
+    sender = pd.DataFrame(sender,index=[0])[['id','first_name','last_name','username','language_code']] ##to cut premiumv ##id added
     await async_insert_on_conflict(sender,'users',unique_cols=['id'],engine = engine)
 
 def plot_nutrition(masks):
@@ -138,8 +138,6 @@ def get_keyboard(t, unit = None):
 # %% ../00_nbs/bot.ipynb 11
 @dp.message_handler(commands=['start'])
 async def start_command(message: types.Message):
-    global m 
-    m = message
     logger.debug({'func':'start_command','id_key':'user_id','id_value':message['from']['id'],'msg':'start_command'})
     await add_sender(message)
 
