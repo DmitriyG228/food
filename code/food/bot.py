@@ -57,7 +57,8 @@ async def  async_insert_on_conflict(*args, **qwargs):
 async def add_sender(message):
     logger.debug({'func':'add_sender','id_key':'user_id','id_value':message['from']['id'],'msg':'add_sender'})
     sender = message['from'].to_python()
-    sender = pd.DataFrame(sender,index=[0])[['id','first_name','last_name','username','language_code']] ##to cut premiumv ##id added
+    sender = pd.DataFrame(sender,index=[0])
+    sender = sender[[c for c in ['id','first_name','last_name','username','language_code'] if c in sender.columns]]
     await async_insert_on_conflict(sender,'users',unique_cols=['id'],engine = engine)
 
 def plot_nutrition(masks):
@@ -141,6 +142,7 @@ async def start_command(message: types.Message):
     logger.debug({'func':'start_command','id_key':'user_id','id_value':message['from']['id'],'msg':'start_command'})
     await add_sender(message)
 
+
     await message.reply(""" Take <b>food pictures</b> to improve your diet.\n 
 
 No  more calorie counting, food weight measurement, manual food logging. <b>A single picture per dish is the only thing you need to do</b> .\n
@@ -156,6 +158,7 @@ Get your <b>nutrition score</b> updated with every meal, try to keep it high.\n
 - <b>use flash</b>\n
 
 Now <b>take a picture of your next dish</b> with the bot!""",parse_mode = 'HTML')
+
 
 # %% ../00_nbs/bot.ipynb 12
 @dp.message_handler(content_types=ContentType.PHOTO,state='*')
