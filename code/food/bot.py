@@ -139,29 +139,26 @@ def get_keyboard(t, unit = None):
 # %% ../00_nbs/bot.ipynb 11
 @dp.message_handler(commands=['start'])
 async def start_command(message: types.Message):
-    try:
-        logger.debug({'func':'start_command','id_key':'user_id','id_value':message['from']['id'],'msg':'start_command'})
-        await add_sender(message)
+    logger.debug({'func':'start_command','id_key':'user_id','id_value':message['from']['id'],'msg':'start_command'})
+    await add_sender(message)
 
 
-        await message.reply(""" Take <b>food pictures</b> to improve your diet.\n 
+    await message.reply(""" Take <b>food pictures</b> to improve your diet.\n 
 
-    No  more calorie counting, food weight measurement, manual food logging. <b>A single picture per dish is the only thing you need to do</b> .\n
-    Your photos are returned back to you colorised as a heat map. Just choose more of coloured in green  next time and less of colorer in  red.\n
-    Get your <b>nutrition score</b> updated with every meal, try to keep it high.\n
-    <b>Calorie density</b> is a scientific approach that allows to <b>eat till satisfaction while still cutting back on calories</b>. That idea is implemented <b>with the power of AI</b> to be as easy to follow as taking pictures.\n
+No  more calorie counting, food weight measurement, manual food logging. <b>A single picture per dish is the only thing you need to do</b> .\n
+Your photos are returned back to you colorised as a heat map. Just choose more of coloured in green  next time and less of colorer in  red.\n
+Get your <b>nutrition score</b> updated with every meal, try to keep it high.\n
+<b>Calorie density</b> is a scientific approach that allows to <b>eat till satisfaction while still cutting back on calories</b>. That idea is implemented <b>with the power of AI</b> to be as easy to follow as taking pictures.\n
 
 
-    <b>how it gain great results:</b>\n
-    - eat only till sutisfaction and do not overeat.
-    - try not to drink your calories.
-    - take photos of all the foods <b>from the same distance</b> and with the same focus distance each time\n
-    - <b>use flash</b>\n
+<b>how it gain great results:</b>\n
+- eat only till sutisfaction and do not overeat.
+- try not to drink your calories.
+- take photos of all the foods <b>from the same distance</b> and with the same focus distance each time\n
+- <b>use flash</b>\n
 
-    Now <b>take a picture of your next dish</b> with the bot!""",parse_mode = 'HTML')
-        
-    except Exception as e:
-        print(e)
+Now <b>take a picture of your next dish</b> with the bot!""",parse_mode = 'HTML')
+
 
 # %% ../00_nbs/bot.ipynb 12
 @dp.message_handler(content_types=ContentType.PHOTO,state='*')
