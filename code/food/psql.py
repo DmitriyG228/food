@@ -165,7 +165,7 @@ class FoodsP (LocalBase):
     version             = Column(INT,    nullable=False)
     clip                = Column(ARRAY(REAL),     nullable=True)
 
-# %% ../00_nbs/00_psql.ipynb 26
+# %% ../00_nbs/00_psql.ipynb 29
 class FoodsPI (LocalBase):
     __tablename__ = 'foods_prompted_images'
     id                  = Column(BIGINT, primary_key=True,autoincrement = True)
@@ -178,7 +178,7 @@ class FoodsPI (LocalBase):
 
     clip                = Column(ARRAY(REAL),          nullable=False)
 
-# %% ../00_nbs/00_psql.ipynb 28
+# %% ../00_nbs/00_psql.ipynb 31
 class Indexed (LocalBase):
     __tablename__ = 'indexed'
     id                   = Column(BIGINT,  primary_key=True)

@@ -40,4 +40,6 @@ d = { 'settings': { 'branch': '{branch}',
             'food.search': { 'food.search.apply_custom_colormap': ('search.html#apply_custom_colormap', 'food/search.py'),
                              'food.search.blend_array2img': ('search.html#blend_array2img', 'food/search.py'),
                              'food.search.get_heatmap': ('search.html#get_heatmap', 'food/search.py'),
-                             'food.search.search': ('search.html#search', 'food/search.py')}}}
+                             'food.search.search': ('search.html#search', 'food/search.py')},
+            'food.search_api': { 'food.search_api.get_polygons': ('dev_search_api.html#get_polygons', 'food/search_api.py'),
+                                 'food.search_api.search': ('dev_search_api.html#search', 'food/search_api.py')}}}

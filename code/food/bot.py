@@ -165,43 +165,48 @@ Now <b>take a picture of your next dish</b> with the bot!""",parse_mode = 'HTML'
 async def process_photo(message: types.Message, state: FSMContext):
     logger.debug({'func':'process_photo','id_key':'user_id','id_value':message['from']['id'],'msg':'process_photo started'})
     
-    processing_reply = await message.reply("""\xa0 your picture is being processed ...""",
-                           parse_mode = 'HTML')
-    
-    await types.ChatActions.upload_photo()
-    photo  = message['photo'][-1]
-    path = reference_images_path/photo['file_id']
-    await photo.download(path)
-    
-    # image_url    = await photo.get_url()
-    image_url      = f'https://dima.grankin.eu/reference_images/{photo["file_id"]}'
-    
-    img,clip_df,masks,stats = await async_search(segment_model,path,prompt_factor=0.1,min_score=0.22,exand_times =2)
-    
-    print('after search')
+    try:
 
-    dish = clip_df.reset_index()[['id','score','area']]
-    dish['photo_id']         = photo['file_id']
-    dish['photo_message_id'] = message['message_id']
-    sender = message['from'].to_python()
-    dish['user_id'] = sender['id']
-    dish['ml_version'] = 0.4 
-    dish['timestamp']=pd.Timestamp.utcnow()
-    dish = dish.rename(columns = {"id":'food_id'})
-    
-    output = '; '.join(clip_df['description'].tolist())
+        processing_reply = await message.reply("""\xa0 your picture is being processed ...""",
+                               parse_mode = 'HTML')
 
-    print('downloaded')
+        await types.ChatActions.upload_photo()
+        photo  = message['photo'][-1]
+        path = reference_images_path/photo['file_id']
+        await photo.download(path)
 
-    img_o = await async_image2file_obj(img)
+        # image_url    = await photo.get_url()
+        image_url      = f'https://dima.grankin.eu/reference_images/{photo["file_id"]}'
+
+        img,clip_df,masks,stats = await async_search(segment_model,path,prompt_factor=0.1,min_score=0.22,exand_times =2)
+
+        print('after search')
+
+        dish = clip_df.reset_index()[['id','score','area']]
+        dish['photo_id']         = photo['file_id']
+        dish['photo_message_id'] = message['message_id']
+        sender = message['from'].to_python()
+        dish['user_id'] = sender['id']
+        dish['ml_version'] = 0.4 
+        dish['timestamp']=pd.Timestamp.utcnow()
+        dish = dish.rename(columns = {"id":'food_id'})
+
+        output = '; '.join(clip_df['description'].tolist())
+
+        print('downloaded')
+
+        img_o = await async_image2file_obj(img)
+
+        await processing_reply.delete()
+        reply = await message.reply_photo(img_o,caption=f'<i>per 100 gram</i>:\n{plot_nutrition(masks)} \n\n{output}', reply_markup=get_keyboard('add to food log'),parse_mode = 'HTML')
+        dish['message_id'] = reply['message_id']
+
+        dish.to_sql('dishes',con=engine,if_exists='append',index = False,schema = 'food')
+
+        logger.debug({'func':'process_photo','id_key':'user_id','id_value':message['from']['id'],'msg':'process_photo finished'})
     
-    await processing_reply.delete()
-    reply = await message.reply_photo(img_o,caption=f'<i>per 100 gram</i>:\n{plot_nutrition(masks)} \n\n{output}', reply_markup=get_keyboard('add to food log'),parse_mode = 'HTML')
-    dish['message_id'] = reply['message_id']
-    
-    dish.to_sql('dishes',con=engine,if_exists='append',index = False,schema = 'food')
-    
-    logger.debug({'func':'process_photo','id_key':'user_id','id_value':message['from']['id'],'msg':'process_photo finished'})
+    except Exception as e:
+        logger.error({'func':'process_photo','id_key':'user_id','id_value':message['from']['id'],'msg':str(e)})
     
     
 
