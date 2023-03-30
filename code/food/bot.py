@@ -50,7 +50,7 @@ from segmentor.segment import get_segment_model
 from .search import *
 from mytools.psql import *
 
-# %% ../00_nbs/bot.ipynb 3
+# %% ../00_nbs/bot.ipynb 6
 async def  async_insert_on_conflict(*args, **qwargs):
     return insert_on_conflict(*args, **qwargs)
 
@@ -73,7 +73,7 @@ def image2file_obj(img):
     img.save(o, format=f)
     return o.getvalue()
 
-# %% ../00_nbs/bot.ipynb 4
+# %% ../00_nbs/bot.ipynb 7
 async def async_image2file_obj(*args,**kwargs):
     return image2file_obj(*args,**kwargs)
 
@@ -83,11 +83,11 @@ async def async_search(*args,**kwargs):
 async def async_visualize_array(*args,**kwargs):
     return visualize_array(*args,**kwargs)
 
-# %% ../00_nbs/bot.ipynb 5
+# %% ../00_nbs/bot.ipynb 8
 model_path = checkpoints_path.ls()[0]
 segment_model = get_segment_model(model_path)
 
-# %% ../00_nbs/bot.ipynb 6
+# %% ../00_nbs/bot.ipynb 9
 bot = Bot(token=API_TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
@@ -97,7 +97,7 @@ dishes_table = Dishes.__table__
 add_dish_cb     = CallbackData('add to food log', 'action')
 remove_cb       = CallbackData('remove from food log', 'action')
 
-# %% ../00_nbs/bot.ipynb 7
+# %% ../00_nbs/bot.ipynb 10
 def attribute_score(cals,values,scores):
     arrays = []
     for n in range(len(values)-1):
@@ -107,17 +107,17 @@ def attribute_score(cals,values,scores):
 
     return formula[1][formula[0]==c].astype(np.int32)[0]
 
-# %% ../00_nbs/bot.ipynb 8
+# %% ../00_nbs/bot.ipynb 11
 def calc_food_score(cals,protein):
     return attribute_score(cals   ,calore_scores[0],calore_scores[1]),attribute_score(protein,protein_scores[0],protein_scores[1])
 
-# %% ../00_nbs/bot.ipynb 9
+# %% ../00_nbs/bot.ipynb 12
 protein_scores = ([0,10,20,35],
                   [30,90,100,100])
 calore_scores  = ([0,  90, 100,150,200,300,400],
                   [100,100, 95,70 ,60 ,50 ,30])
 
-# %% ../00_nbs/bot.ipynb 10
+# %% ../00_nbs/bot.ipynb 13
 def get_keyboard(t, unit = None):
     markup = types.InlineKeyboardMarkup()
     if t == 'add to food log' :  
@@ -136,7 +136,7 @@ def get_keyboard(t, unit = None):
 
     return markup 
 
-# %% ../00_nbs/bot.ipynb 11
+# %% ../00_nbs/bot.ipynb 14
 @dp.message_handler(commands=['start'])
 async def start_command(message: types.Message):
     logger.debug({'func':'start_command','id_key':'user_id','id_value':message['from']['id'],'msg':'start_command'})
@@ -160,9 +160,10 @@ Get your <b>nutrition score</b> updated with every meal, try to keep it high.\n
 Now <b>take a picture of your next dish</b> with the bot!""",parse_mode = 'HTML')
 
 
-# %% ../00_nbs/bot.ipynb 12
+# %% ../00_nbs/bot.ipynb 16
 @dp.message_handler(content_types=ContentType.PHOTO,state='*')
 async def process_photo(message: types.Message, state: FSMContext):
+    global img,clip_df,masks,stats #new
     logger.debug({'func':'process_photo','id_key':'user_id','id_value':message['from']['id'],'msg':'process_photo started'})
     
     try:
@@ -190,8 +191,14 @@ async def process_photo(message: types.Message, state: FSMContext):
         dish['ml_version'] = 0.4 
         dish['timestamp']=pd.Timestamp.utcnow()
         dish = dish.rename(columns = {"id":'food_id'})
+        
+        clip_df['%'] = (clip_df['area']/clip_df['area'].sum()*100).astype(int).astype('str')+'%'
+        clip_df['description'] = clip_df['description'] +' '+clip_df['%']
+        clip_df['description'] = clip_df['description'].str.replace('NFS|NS','')
 
         output = '; '.join(clip_df['description'].tolist())
+        print(output)
+        output = ask_chatgpt(output)['content'] #new
 
         print('downloaded')
 
@@ -210,7 +217,7 @@ async def process_photo(message: types.Message, state: FSMContext):
     
     
 
-# %% ../00_nbs/bot.ipynb 13
+# %% ../00_nbs/bot.ipynb 17
 async def get_food_score(user_id):
 
     today_consumed = pd.read_sql( f"""select f.energy, f.protein, d.area,d.timestamp
@@ -233,7 +240,7 @@ async def get_food_score(user_id):
     
     else: return None,None,None,None,None,0
 
-# %% ../00_nbs/bot.ipynb 14
+# %% ../00_nbs/bot.ipynb 18
 def prep_score_msg(msg,add,food_score,cals_score,prts_score,area):
     if cals_score:
         if cals_score < 70:
@@ -259,7 +266,7 @@ def prep_score_msg(msg,add,food_score,cals_score,prts_score,area):
             msg = f"{msg}\n\n\xa0keep adding your dishes to get your food score"
     return msg
 
-# %% ../00_nbs/bot.ipynb 15
+# %% ../00_nbs/bot.ipynb 19
 async def add_remove(query,add):
     
     msg = query.to_python()['message']['caption']
@@ -292,7 +299,7 @@ async def add_remove(query,add):
                                     parse_mode = 'HTML')
     
 
-# %% ../00_nbs/bot.ipynb 16
+# %% ../00_nbs/bot.ipynb 20
 #add_dish pushed
 @dp.callback_query_handler(add_dish_cb.filter(action=['add_dish']))
 async def add_dish(query: types.CallbackQuery, callback_data: typing.Dict[str, str]):
@@ -300,7 +307,7 @@ async def add_dish(query: types.CallbackQuery, callback_data: typing.Dict[str, s
     
     await add_remove(query,True)
 
-# %% ../00_nbs/bot.ipynb 17
+# %% ../00_nbs/bot.ipynb 21
 #remove_dish pushed
 @dp.callback_query_handler(remove_cb.filter(action=['remove']))
 async def remove_dish(query: types.CallbackQuery, callback_data: typing.Dict[str, str]):
@@ -308,6 +315,6 @@ async def remove_dish(query: types.CallbackQuery, callback_data: typing.Dict[str
     
     await add_remove(query,False)
 
-# %% ../00_nbs/bot.ipynb 18
+# %% ../00_nbs/bot.ipynb 22
 executor = executor
 

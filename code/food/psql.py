@@ -2,8 +2,7 @@
 
 # %% auto 0
 __all__ = ['passw', 'docker_name', 'port', 'engine', 'Session', 'session', 'Base', 'schema', 'LocalBase', 'docker_run', 'pgdump',
-           'pgrestore', 'Foods', 'CFoods', 'FFoods', 'Users', 'Dishes', 'User_properties', 'FoodsP', 'FoodsPI',
-           'Indexed']
+           'pgrestore', 'Users', 'Messages']
 
 # %% ../00_nbs/00_psql.ipynb 3
 from sqlalchemy import create_engine
@@ -53,9 +52,9 @@ from .paths import *
 
 # %% ../00_nbs/00_psql.ipynb 4
 passw = 'postgres'
-docker_name = 'psql_food_dev'
+docker_name = 'psql_food_chatgpt'
 
-port = 5435 if branch == 'prod' else 5436
+port = 5441
 
 
 
@@ -86,33 +85,6 @@ def pgrestore(docker_name, dump_path = False):
     return f'cat {dump_path} | docker exec -i {docker_name} psql -U postgres | >> log.log'
 
 # %% ../00_nbs/00_psql.ipynb 15
-class Foods (LocalBase):
-    __tablename__ = 'foods' 
-    id                  = Column(BIGINT, primary_key=True)
-    description         = Column(String,          nullable=False)
-    category            = Column(String,          nullable=False)
-    energy              = Column(Float,          nullable=False)
-    protein             = Column(Float,          nullable=False)
-    carb                = Column(Float,          nullable=False)
-    fat                 = Column(Float,          nullable=False)
-    
-    clip                = Column(ARRAY(REAL),          nullable=True)
-
-# %% ../00_nbs/00_psql.ipynb 17
-class CFoods (LocalBase):
-    __tablename__ = 'foods_clusters' 
-    id                  = Column(BIGINT,  primary_key=True)
-    cluster             = Column(Integer, nullable=True)
-
-# %% ../00_nbs/00_psql.ipynb 18
-class FFoods (LocalBase):
-    __tablename__ = 'foundation_foods' 
-    id                  = Column(BIGINT, primary_key=True)
-    description         = Column(String,          nullable=False)
-    
-    clip                = Column(ARRAY(REAL),          nullable=True)
-
-# %% ../00_nbs/00_psql.ipynb 19
 class Users (LocalBase):
     __tablename__ = 'users' 
     id                  = Column(BIGINT,     primary_key=True)
@@ -122,64 +94,11 @@ class Users (LocalBase):
     language_code       = Column(String,     nullable=True)
     
 
-# %% ../00_nbs/00_psql.ipynb 21
-class Dishes (LocalBase):
-    __tablename__ = 'dishes'
+# %% ../00_nbs/00_psql.ipynb 18
+class Messages (LocalBase):
+    __tablename__ = 'messages'
     id                   = Column(BIGINT,  primary_key=True, autoincrement = True)
-    food_id                   = Column(BIGINT,    nullable=False)
-    
-    # description          = Column(String,   nullable=False)
-    # energy               = Column(Float,    nullable=False)
-    # protein              = Column(Float,    nullable=False)
-    # carb                 = Column(Float,    nullable=False)
-    # fat                  = Column(Float,    nullable=False)
-    score                = Column(Float,    nullable=False)
-
-    photo_id            = Column(String,   nullable=False)
-    user_id             = Column(BIGINT,   nullable=False)
-    photo_message_id    = Column(BIGINT,   nullable=False)
-    message_id          = Column(BIGINT,   nullable=False)
-
+    user_id               = Column(BIGINT, nullable=False)
+    message               = Column(JSON,    nullable=False)
     timestamp           = Column(DateTime(timezone=True), nullable=False)
-    ml_version          = Column(Float,    nullable=False)
-
-    area                = Column(Integer,  nullable=False)
-    
     added               = Column(Boolean, nullable   =True)
-
-# %% ../00_nbs/00_psql.ipynb 22
-class User_properties (LocalBase):
-    __tablename__ = 'user_properties'
-    id                  = Column(BIGINT,  primary_key=True, autoincrement = True)
-    user_id             = Column(BIGINT,   nullable=False)
-    property            = Column(String,   nullable=False)
-    value               = Column(String,   nullable=False)
-    timestamp           = Column(DateTime(timezone=True), nullable=False)
-
-# %% ../00_nbs/00_psql.ipynb 23
-class FoodsP (LocalBase):
-    __tablename__ = 'foods_prompted' #inferenced text of altered food classes
-    id                  = Column(BIGINT, primary_key=True)
-    food_id             = Column(BIGINT, nullable=False)
-    text                = Column(String, nullable=False)
-    version             = Column(INT,    nullable=False)
-    clip                = Column(ARRAY(REAL),     nullable=True)
-
-# %% ../00_nbs/00_psql.ipynb 29
-class FoodsPI (LocalBase):
-    __tablename__ = 'foods_prompted_images'
-    id                  = Column(BIGINT, primary_key=True,autoincrement = True)
-    food_id             = Column(BIGINT,   nullable=False)
-    country_code        = Column(String,          nullable=True)
-    store_name          = Column(String,          nullable=True)
-    product_name        = Column(String,          nullable=True)
-    path                = Column(String,          nullable=True)
-    accuracy            = Column(Float,          nullable=True)
-
-    clip                = Column(ARRAY(REAL),          nullable=False)
-
-# %% ../00_nbs/00_psql.ipynb 31
-class Indexed (LocalBase):
-    __tablename__ = 'indexed'
-    id                   = Column(BIGINT,  primary_key=True)
-    indexed              = Column(Boolean, nullable   =False)
